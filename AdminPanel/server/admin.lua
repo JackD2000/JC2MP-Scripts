@@ -147,16 +147,16 @@ end ]]--
 
 -- User-created functions
 
-function confirmationMessage( player, message )
+function confirmationMessage(player, message)
 	Chat:Send(player, message, Color(124, 242, 0))
 end
 
-function deniedMessage( player, message )
+function deniedMessage(player, message)
 	Chat:Send(player, message, Color(255, 0, 0))
 end
 
 function boost(args, client)
-	Chat:Broadcast(tostring(string.char(args.key)),Color(210,210,210))
+	--Chat:Broadcast(tostring(string.char(args.key)),Color(210,210,210))
 
 	if(isAdmin(client)) then
 		if(args.key == string.byte("Y")) then
@@ -164,47 +164,19 @@ function boost(args, client)
 
 				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity()*100)
 
-				return true
 			end
-
-			Chat:Broadcast(client:GetName() .. " is a retard!", Color(150, 0, 0))
-
-			return false
 		end
 	end
-
-	return false
 end
 
 Network:Subscribe("key", boost)
 
 function admin:PlayerChat(args)
 		
-    local cmd_args = args.text:split( " " )
+    local cmd_args = args.text:split(" ")
 	sender = args.player
 
 	if(isAdmin(args.player)) then
-		
-		--BOOST
-		if(cmd_args[1]) == "/boost" then
-			if(sender:InVehicle()) then
-
-				sender:GetVehicle():SetLinearVelocity(sender:GetVehicle():GetLinearVelocity() * 100)
-
-				return true
-			else
-				--Placeholder stuff -> Make the player get boosted
-				return true
-			end
-			
-			return false
-		end
-
-		if(cmd_args[1]) == "/ping" then
-			Chat:Broadcast(sender:GetName() .. "s ping: " .. tostring(sender:GetPing()), Color(150, 150, 150))
-			return true
-		end
-
 
 		if(cmd_args[1]) == "/kick" then
 			if #cmd_args < 1 then
@@ -446,6 +418,11 @@ function admin:PlayerChat(args)
 		
 	end
 	
+	if(cmd_args[1]) == "/ping" then
+		Chat:Broadcast(sender:GetName() .. "s ping: " .. tostring(sender:GetPing()), Color(150, 150, 150))
+		return true
+	end
+
 	if(cmd_args[1]) == "/kill" then
 		if #cmd_args < 2 then
 			args.player:SetHealth(0)
