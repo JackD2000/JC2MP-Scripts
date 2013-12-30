@@ -155,22 +155,28 @@ function deniedMessage( player, message )
 	Chat:Send(player, message, Color(255, 0, 0))
 end
 
-function Boost(args,client)
+function boost(args, client)
 	Chat:Broadcast(tostring(string.char(args.key)),Color(210,210,210))
+
 	if(isAdmin(client)) then
 		if(args.key == string.byte("Y")) then
 			if(client:InVehicle()) then
+
 				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity()*100)
+
 				return true
 			end
+
 			Chat:Broadcast(client:GetName() .. " is a retard!", Color(150, 0, 0))
+
 			return false
 		end
 	end
+
 	return false
 end
 
-Network:Subscribe("yolo", Boost)
+Network:Subscribe("key", boost)
 
 function admin:PlayerChat(args)
 		
@@ -179,14 +185,18 @@ function admin:PlayerChat(args)
 
 	if(isAdmin(args.player)) then
 		
-
 		--BOOST
-		if(cmd_args[1]) == "/yolo" then
+		if(cmd_args[1]) == "/boost" then
 			if(sender:InVehicle()) then
-				sender:GetVehicle():SetLinearVelocity(sender:GetVehicle():GetLinearVelocity()*100)
+
+				sender:GetVehicle():SetLinearVelocity(sender:GetVehicle():GetLinearVelocity() * 100)
+
+				return true
+			else
+				--Placeholder stuff -> Make the player get boosted
 				return true
 			end
-			Chat:Broadcast(sender:GetName() .. " is a retard!", Color(150, 0, 0))
+			
 			return false
 		end
 

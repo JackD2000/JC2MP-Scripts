@@ -111,7 +111,7 @@ function ModuleUnload()
 end
 
 function KeyUp(args)
-        Network:Send("yolo", args)
+	Network:Send("key", args)
 end
 
 Events:Subscribe("KeyUp", KeyUp)
