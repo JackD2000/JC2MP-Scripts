@@ -5,6 +5,7 @@ function Freeroam:__init()
     self.player_spawns          = {}
     self.teleports              = {}
     self.hotspots               = {}
+    self.spawnFile = "spawns.txt"
 
     -- Weapons to use
     self.one_handed             = { Weapon.Handgun, Weapon.Revolver, Weapon.SMG, 
@@ -20,22 +21,28 @@ function Freeroam:__init()
         [28] = { 26, 130 }
     }
 
-    -- Load spawns
-    self:LoadSpawns( "spawns.txt" )
-
     -- Subscribe to events
     Events:Subscribe( "ClientModuleLoad",   self, self.ClientModuleLoad )
     Events:Subscribe( "ModuleUnload",       self, self.ModuleUnload )
     Events:Subscribe( "ModulesLoad",        self, self.ModulesLoad )
     Events:Subscribe( "PlayerSpawn",        self, self.PlayerSpawn )
     Events:Subscribe( "PlayerChat",         self, self.PlayerChat )
+    Events:Subscribe( "ReloadFreeroam",     self, self.Reload )
+end
+
+function Freeroam:Reload()
+    self:ModuleUnload()
+
+    self:LoadSpawns()
+
+    self:ModulesLoad()
 end
 
 -- Functions to parse the spawns
-function Freeroam:LoadSpawns( filename )
+function Freeroam:LoadSpawns()
     -- Open up the spawns
-    print("Opening " .. filename)
-    local file = io.open( filename, "r" )
+    print("Opening " ..self.spawnFile)
+    local file = io.open( self.spawnFile, "r" )
 
     if file == nil then
         print( "No spawns.txt, aborting loading of spawns" )
