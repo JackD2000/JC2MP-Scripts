@@ -21,12 +21,30 @@ function Freeroam:__init()
         [28] = {26, 130}
     }
 
+<<<<<<< HEAD
+    -- Load spawns
+    self:LoadSpawns("spawns.txt")
+
     -- Subscribe to events
     Events:Subscribe("ClientModuleLoad", self, self.ClientModuleLoad)
     Events:Subscribe("ModuleUnload",     self, self.ModuleUnload)
     Events:Subscribe("ModulesLoad",      self, self.ModulesLoad)
     Events:Subscribe("PlayerSpawn",      self, self.PlayerSpawn)
     Events:Subscribe("PlayerChat",       self, self.PlayerChat)
+end
+
+-- Functions to parse the spawns
+function Freeroam:LoadSpawns(filename)
+    -- Open up the spawns
+    print("Opening " .. filename)
+    local file = io.open(filename, "r")
+=======
+    -- Subscribe to events
+    Events:Subscribe( "ClientModuleLoad",   self, self.ClientModuleLoad )
+    Events:Subscribe( "ModuleUnload",       self, self.ModuleUnload )
+    Events:Subscribe( "ModulesLoad",        self, self.ModulesLoad )
+    Events:Subscribe( "PlayerSpawn",        self, self.PlayerSpawn )
+    Events:Subscribe( "PlayerChat",         self, self.PlayerChat )
     Events:Subscribe( "ReloadFreeroam",     self, self.Reload )
 end
 
@@ -43,6 +61,7 @@ function Freeroam:LoadSpawns()
     -- Open up the spawns
     print("Opening " ..self.spawnFile)
     local file = io.open( self.spawnFile, "r" )
+>>>>>>> origin/master
 
     if file == nil then
         print("No spawns.txt, aborting loading of spawns")

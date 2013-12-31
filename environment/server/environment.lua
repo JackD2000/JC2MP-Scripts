@@ -3,7 +3,7 @@ class 'Environment'
 function Environment:__init()
 	self.admins = {}
 	self:AddAdmin("STEAM_0:0:26199873")
-	seld:AddAdmin("STEAM_0:0:28323431")
+	self:AddAdmin("STEAM_0:0:28323431")
 
 	Events:Subscribe("PlayerChat", self, self.PlayerChat)
 end

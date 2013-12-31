@@ -4,8 +4,13 @@ local adminPrefix = "[Admin] "
 
 -- Change this value to whatever your STEAM ID is! (Type /id in-game)
 
+<<<<<<< HEAD
+local admins = {}
+				
+=======
 local admins = { }
 
+>>>>>>> origin/master
 local admincount = 0
 
 local invalidArgs = "You have entered invalid arguments."
@@ -155,6 +160,26 @@ function deniedMessage(player, message)
 	Chat:Send(player, message, Color(255, 0, 0))
 end
 
+<<<<<<< HEAD
+function boost(args, client)
+	--Chat:Broadcast(tostring(args.key),Color(210,210,210))
+
+	if(isAdmin(client)) then
+		if(args.key == 16) then
+			if(client:InVehicle()) then
+
+				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity()*10)
+
+			end
+		end
+	end
+end
+
+Network:Subscribe("key", boost)
+
+
+=======
+>>>>>>> origin/master
 function admin:PlayerChat(args)
 		
     local cmd_args = args.text:split(" ")
