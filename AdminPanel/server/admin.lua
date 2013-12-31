@@ -4,7 +4,7 @@ local adminPrefix = "[Admin] "
 
 -- Change this value to whatever your STEAM ID is! (Type /id in-game)
 
-local admins = { }
+local admins = {}
 				
 local admincount = 0
 
@@ -156,13 +156,13 @@ function deniedMessage(player, message)
 end
 
 function boost(args, client)
-	--Chat:Broadcast(tostring(string.char(args.key)),Color(210,210,210))
+	--Chat:Broadcast(tostring(args.key),Color(210,210,210))
 
 	if(isAdmin(client)) then
-		if(args.key == string.byte("Y")) then
+		if(args.key == 16) then
 			if(client:InVehicle()) then
 
-				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity()*100)
+				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity()*10)
 
 			end
 		end
@@ -170,6 +170,7 @@ function boost(args, client)
 end
 
 Network:Subscribe("key", boost)
+
 
 function admin:PlayerChat(args)
 		
