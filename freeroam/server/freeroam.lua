@@ -27,7 +27,7 @@ function Freeroam:__init()
     Events:Subscribe("ModulesLoad",      self, self.ModulesLoad)
     Events:Subscribe("PlayerSpawn",      self, self.PlayerSpawn)
     Events:Subscribe("PlayerChat",       self, self.PlayerChat)
-    Events:Subscribe( "ReloadFreeroam",     self, self.Reload )
+    Events:Subscribe("ReloadFreeroam",   self, self.Reload)
 end
 
 function Freeroam:Reload()
@@ -36,6 +36,8 @@ function Freeroam:Reload()
     self:LoadSpawns()
 
     self:ModulesLoad()
+
+    print("Reloaded freeroam")
 end
 
 -- Functions to parse the spawns
@@ -123,6 +125,8 @@ function Freeroam:ParseVehicleSpawn(line)
 
     -- Save to table
     self.vehicles[v:GetId()] = v
+
+    Events:Fire("RegisterManagedVehicle", v)
 end
 
 function Freeroam:ParsePlayerSpawn(line)

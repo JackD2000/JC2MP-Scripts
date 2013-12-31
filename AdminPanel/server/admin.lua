@@ -123,28 +123,6 @@ function admin:PlayerQuit( args )
 	end
 end
 
-
---[[function admin:PlayerDeath ( args )
-	if adminKillReward then
-		if args.killer then
-			if(isAdmin(args.player)) then
-				for p in Server:GetPlayers() do
-					p:SetMoney(p:GetMoney() + 1000)
-				end
-				
-				Chat:Broadcast(args.killer:GetName() .. " killed the Admin " .. args.player:GetName() .. ", everyone receives $1,000! (Except them, " ..  args.player:GetName() .. " doesn't like them)", Color(255, 0, 0))
-			end
-		else 
-			if(isAdmin(args.player)) then
-				for p in Server:GetPlayers() do
-					p:SetMoney(p:GetMoney() + 1000)
-				end
-				Chat:Broadcast(args.player:GetName() .. " died terribly. Everyone receives $1,000!", Color(255, 0, 0))
-			end
-		end
-	end
-end ]]--
-
 -- User-created functions
 
 function confirmationMessage(player, message)
