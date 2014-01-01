@@ -25,7 +25,8 @@ local managedList = {}
 local interval = 30 --MINUTES
 
 local timer = nil
-local triggeredWarning = false
+local WarningA = false
+local WarningB = false
 
 function Garbagecleaner:__init()
 	Events:Subscribe("PlayerChat", self, self.PlayerChat)
@@ -54,9 +55,13 @@ function Garbagecleaner:Cycle(args)
 	if not timer then
 		timer = Timer()
 	else
-		if timer:GetSeconds() > (interval - 5) * 60 and triggeredWarning == false then
-			Chat:Broadcast("[SERVER] Performing routine garbage cleanup in 5 minutes!", Color(255,  0,  0))
-			triggeredWarning = true
+		if timer:GetSeconds() > (interval - 5) * 60 and WarningA == false then
+			Chat:Broadcast("[SERVER] Performing routine garbage cleanup in 5 minutes!", Color(255,  155,  55))
+			WarningA = true
+
+		elseif timer:GetSeconds() > (interval - 0.167) * 60 and WarningB == false then
+			Chat:Broadcast("[SERVER] Performing routine garbage cleanup in 10 seconds!", Color(255,  155,  55))
+			WarningB = true
 
 		elseif timer:GetSeconds() > interval * 60 then
 			self:Cleanup()
@@ -71,7 +76,7 @@ function Garbagecleaner:PlayerChat(args)
 
 			return false
 		else
-			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color(255,  0,  0))
+			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color(255,  155,  55))
 		end
 	end
  
@@ -83,7 +88,7 @@ function Garbagecleaner:AddToManagedList(vehicle)
 end
 
 function Garbagecleaner:Cleanup()
-	Chat:Broadcast("[SERVER] Commencing garbage cleanup!", Color(255,  0,  0))
+	Chat:Broadcast("[SERVER] Commencing garbage cleanup!", Color(255,  155,  55))
 
 	--We check if managed vehicles are still in the game. If not, remove them from the list.
 	for i, v in pairs(managedList) do
@@ -108,13 +113,14 @@ function Garbagecleaner:Cleanup()
 	end
 
 	if count > 0 then
-		Chat:Broadcast("[SERVER] Successfully cleaned up all unmanaged vehicles! (Count: " ..count ..")", Color(255,  0,  0))
+		Chat:Broadcast("[SERVER] Successfully cleaned up all unmanaged vehicles! (Count: " ..count ..")", Color(255,  155,  55))
 	else
-		Chat:Broadcast("[SERVER] No vehicles needed to be removed!", Color(255,  0,  0))
+		Chat:Broadcast("[SERVER] No vehicles needed to be removed!", Color(255,  155,  55))
 	end
 
 	timer = nil
-	triggeredWarning = false
+	WarningA = false
+	WarningB = false
 end
 
 local cleaner = Garbagecleaner()
