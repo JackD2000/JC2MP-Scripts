@@ -43,7 +43,7 @@ function Garbagecleaner:isAdmin(player)
 		adminstring = adminstring .. line .. " "
 	end
 
-	if(string.match(adminstring, tostring(player:GetSteamId()))) then
+	if(string.match(adminstring, player:GetSteamId().string)) then
 		return true
 	end
 	

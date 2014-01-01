@@ -4,7 +4,7 @@ local adminPrefix = "[Admin] "
 
 -- Change this value to whatever your STEAM ID is! (Type /id in-game)
 
-local admins = { }
+local admins = {}
 
 local admincount = 0
 
@@ -94,11 +94,10 @@ function admin:__init()
     Events:Subscribe("PlayerChat" , self, self.PlayerChat)
 	Events:Subscribe("PlayerJoin" , self, self.PlayerJoin)
 	Events:Subscribe("PlayerQuit" , self, self.PlayerQuit)
-	
 	self:loadAdmins("server/admins.txt")
 end
 
-function isAdmin( player )
+function isAdmin(player)
 	local adminstring = ""
 	for i,line in ipairs(admins) do
 		adminstring = adminstring .. line .. " "
@@ -111,13 +110,13 @@ function isAdmin( player )
 	return false
 end
 
-function admin:PlayerJoin( args )
+function admin:PlayerJoin(args)
 	if showJoin then 
 		Chat:Broadcast("Join> " .. args.player:GetName() .. " joined the server!", Color(255,215,0))
 	end
 end
 
-function admin:PlayerQuit( args )
+function admin:PlayerQuit(args)
 	if showLeave then
 		Chat:Broadcast("Leave> " .. args.player:GetName() .. " left the server!", Color(255,215,0))
 	end
@@ -132,6 +131,7 @@ end
 function deniedMessage(player, message)
 	Chat:Send(player, message, Color(255, 0, 0))
 end
+
 
 function admin:PlayerChat(args)
 		
