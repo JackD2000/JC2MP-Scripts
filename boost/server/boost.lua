@@ -4,8 +4,7 @@
 		As an Admin use shift to multiply your speed and ctrl to brake.
 
 		TODO:	-> Add different modes
-				-> Allow Admins to approve self.players for use
-				-> Use chat commands for easy customisation
+				-> Allow Admins to approve players for use
 				-> Possible GUI for configuration
 ]]
 
@@ -87,39 +86,35 @@ end
 
 function Boost:Accelerate(args, client)
 	if client:GetWorld():GetId() == 0 then
-		if self:isAdmin(client) then
-			if self.players[tostring(client:GetSteamId())] then
-				if self.players[tostring(client:GetSteamId())].enabled == true then
-					local vehicle = client:GetVehicle()
+		if self.players[tostring(client:GetSteamId())] then
+			if self.players[tostring(client:GetSteamId())].enabled == true then
+				local vehicle = client:GetVehicle()
 
-					if not IsValid(vehicle) then
-						return
-					end
+				if not IsValid(vehicle) then
+					return
+				end
 
-					self.players[tostring(client:GetSteamId())].speed = math.clamp(self.players[tostring(client:GetSteamId())].speed + self.boostAmount, 1, 1000)
+				self.players[tostring(client:GetSteamId())].speed = math.clamp(self.players[tostring(client:GetSteamId())].speed + self.boostAmount, 1, 1000)
 
-				 	client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * self.players[tostring(client:GetSteamId())].speed)
-				 end
+			 	client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * self.players[tostring(client:GetSteamId())].speed)
 			 end
-		end
+		 end
 	end
 end
 
 function Boost:Brake(args, client)
 	if client:GetWorld():GetId() == 0 then
-		if self:isAdmin(client) then
-			if self.players[tostring(client:GetSteamId())] then
-				if self.players[tostring(client:GetSteamId())].enabled == true then
-					local vehicle = client:GetVehicle()
+		if self.players[tostring(client:GetSteamId())] then
+			if self.players[tostring(client:GetSteamId())].enabled == true then
+				local vehicle = client:GetVehicle()
 
-					if not IsValid(vehicle) then
-						return
-					end
-
-					self.players[tostring(client:GetSteamId())].speed = math.clamp(self.players[tostring(client:GetSteamId())].speed - (self.boostAmount * 25), 1, 1000)
-
-					client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * math.clamp(self.players[tostring(client:GetSteamId())].speed, 0, 1000))
+				if not IsValid(vehicle) then
+					return
 				end
+
+				self.players[tostring(client:GetSteamId())].speed = math.clamp(self.players[tostring(client:GetSteamId())].speed - (self.boostAmount * 25), 1, 1000)
+
+				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * math.clamp(self.players[tostring(client:GetSteamId())].speed, 0, 1000))
 			end
 		end
 	end

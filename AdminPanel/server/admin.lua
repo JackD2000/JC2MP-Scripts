@@ -94,7 +94,7 @@ function admin:__init()
     Events:Subscribe("PlayerChat" , self, self.PlayerChat)
 	Events:Subscribe("PlayerJoin" , self, self.PlayerJoin)
 	Events:Subscribe("PlayerQuit" , self, self.PlayerQuit)
---	Events:Subscribe("PlayerDeath", self, self.PlayerDeath)
+	
 	self:loadAdmins("server/admins.txt")
 end
 
