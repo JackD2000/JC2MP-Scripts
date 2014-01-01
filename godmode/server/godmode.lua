@@ -5,11 +5,12 @@ local admins = {
 	"STEAM_0:0:28323431",
 }
 
-local gods	 = {}
+local gods = {}
 
 function GodMode:__init()
 	Events:Subscribe("PlayerChat", self, self.PlayerChat)
 	Events:Subscribe("PreTick", self, self.keepGodsAlive)
+	Events:Subscribe("PlayerQuit", self, self.PlayerQuit)
 end
 
 function isAdmin(player)
@@ -103,11 +104,7 @@ function GodMode:PlayerChat(args)
 				if(i > 1) then
 					godNames = godNames .. ", "
 				end
-				if getPlayerName(line) == nil then
-					godNames = godNames .. line
-				else
-					godNames = godNames .. getPlayerName(line)
-				end
+					godNames = godNames .. getPlayerName(line) .. "(" .. line .. ")"
 			end
 
 			Chat:Send(args.player, godNames, Color(200, 200, 200))
@@ -117,6 +114,10 @@ function GodMode:PlayerChat(args)
 		end
 	end
 	return true
+end
+
+function GodMode:PlayerQuit(args)
+	self:removeGod(args.player)
 end
 
 local godmode = GodMode()
