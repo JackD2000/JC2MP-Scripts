@@ -39,7 +39,6 @@ function isGod(player)
 end
 
 function getPlayerName(steamid)
-
 	for player in Server:GetPlayers() do
 
 		if steamid == player:GetSteamId().string then
@@ -52,8 +51,8 @@ end
 
 function GodMode:addGod(player)
 
-	table.insert(gods,player:GetSteamId().string)
-	Chat:Broadcast(player:GetName() .. " is ", Color(200, 200, 200))
+	table.insert(gods, player:GetSteamId().string)
+	Chat:Send(player, "You are now immortal!", Color(200, 200, 200))
 end
 
 function GodMode:removeGod(player)
@@ -62,7 +61,7 @@ function GodMode:removeGod(player)
 		if player:GetSteamId().string == v then
 
 			table.remove(gods,i)
-			Chat:Broadcast(player:GetName() .. " is mortal again!", Color(200, 200, 200))
+			Chat:Send(player, "You are mortal again.", Color(200, 200, 200))
 		end
 	end
 end
@@ -81,8 +80,8 @@ function GodMode:keepGodsAlive()
 end
 
 function GodMode:PlayerChat(args)
-	if isAdmin(args.player) then
-		if args.text == "/godmode" then
+	if args.text == "/godmode" then
+		if isAdmin(args.player) then
 
 			if isGod(args.player) then
 				self:removeGod(args.player)
@@ -90,24 +89,34 @@ function GodMode:PlayerChat(args)
 				self:addGod(args.player)
 			end
 			return false
+		else
+			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color(255,  0,  0))
 		end
-
-		if args.text == "/gods" then
+	end
+	if args.text == "/gods" then
+		if isAdmin(args.player) then
 			godNames = "No one is in Godmode."
+
 			for i,line in ipairs(gods) do
 				godNames = "Gods: "
+
 				if(i > 1) then
 					godNames = godNames .. ", "
 				end
-
-				godNames = godNames .. getPlayerName(line)
+				if getPlayerName(line) == nil then
+					godNames = godNames .. line
+				else
+					godNames = godNames .. getPlayerName(line)
+				end
 			end
 
-			Chat:Broadcast(godNames,Color(200, 200, 200))
+			Chat:Send(args.player, godNames, Color(200, 200, 200))
 			return false
+		else
+			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color(255,  0,  0))
 		end
-	return true
 	end
+	return true
 end
 
 local godmode = GodMode()
