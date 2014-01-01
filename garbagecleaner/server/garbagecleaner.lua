@@ -71,7 +71,7 @@ function Garbagecleaner:PlayerChat(args)
 
 			return false
 		else
-			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.")
+			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color(255,  0,  0))
 		end
 	end
  
@@ -94,17 +94,24 @@ function Garbagecleaner:Cleanup()
 		v = nil
 	end
 
+	local count = 0
+
 	for v in Server:GetVehicles() do
-		if not managedList[v:GetId()] or v:GetUnoccupiedRemove() == true then
+		if not managedList[v:GetId()] then
 			if v:GetWorld():GetId() == 0 then
-				if #v:GetOccupants() < 1 then
+				if #v:GetOccupants() == 0 then
+					count = count + 1
 					v:Remove()
 				end
 			end
 		end
 	end
 
-	Chat:Broadcast("[SERVER] Successfully cleaned up all unmanaged vehicles!", Color(255,  0,  0))
+	if count > 0 then
+		Chat:Broadcast("[SERVER] Successfully cleaned up all unmanaged vehicles! (Count: " ..count ..")", Color(255,  0,  0))
+	else
+		Chat:Broadcast("[SERVER] No vehicles needed to be removed!", Color(255,  0,  0))
+	end
 
 	timer = nil
 	triggeredWarning = false
