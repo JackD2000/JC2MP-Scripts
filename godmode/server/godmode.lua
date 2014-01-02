@@ -154,14 +154,15 @@ function Godmode:KeepAlive()
 	end
 
 	for i, player in pairs(self.reviveList) do
+		if IsValid(player) then
+			if player:GetHealth() ~= 0 then
+				player:Teleport(self.reviveCoords[player:GetSteamId().string], Angle())
 
-		if player:GetHealth() ~= 0 then
-			player:Teleport(self.reviveCoords[player:GetSteamId().string], Angle())
+				self.reviveList[player:GetSteamId().string] = nil
+				self.reviveCoords[player:GetSteamId().string] = nil
 
-			self.reviveList[player:GetSteamId().string] = nil
-			self.reviveCoords[player:GetSteamId().string] = nil
-
-			Chat:Send(player, "[Godmode] You have been teleported to your death position!", Color(0, 255, 0))
+				Chat:Send(player, "[Godmode] You have been teleported to your death position!", Color(0, 255, 0))
+			end
 		end
 	end
 end
