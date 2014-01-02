@@ -141,15 +141,29 @@ function Godmode:PlayerChat(args)
 	if cmd_args[1] == "/godmode" then
 		if self:isAdmin(args.player) then
 			if cmd_args[2] then
-				if cmd_args[2] == "add" and cmd_args[3] then
+				if cmd_args[2] == "add" then
 
 					local p = nil
 					local id = 0
 					local name = ""
 
-					if cmd_args[3] ~= "." then
+					if cmd_args[3] ~= "." and cmd_args[3] ~= nil then
+
+						local referenceName = ""
+
+						--If a players name has spaces we decide to merge these to a full string
+						for i, namepart in pairs(cmd_args) do
+							if i < 3 then
+
+							elseif i == 3 then
+								referenceName = (referenceName ..namepart)
+							else
+								referenceName = (referenceName .." " ..namepart)
+							end
+						end
+
 						for player in Server:GetPlayers() do
-							if player:GetName() == cmd_args[3] then
+							if player:GetName() == referenceName then
 								if player:GetWorld():GetId() == 0 then
 
 									p = player
@@ -158,7 +172,7 @@ function Godmode:PlayerChat(args)
 
 									break
 								else
-									Chat:Send(args.player, "[Godmode] " ..cmd_args[3] .." is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+									Chat:Send(args.player, "[Godmode] '" ..referenceName .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
 
 									return false
 								end
@@ -166,7 +180,7 @@ function Godmode:PlayerChat(args)
 						end
 
 						if name == "" and id == 0 then
-							Chat:Send(args.player, "[Godmode] " ..cmd_args[3] .." was not found on the server and will be ignored!", Color( 255, 0, 0))
+							Chat:Send(args.player, "[Godmode] '" ..referenceName .."' was not found on the server and will be ignored!", Color( 255, 0, 0))
 
 							return false
 						end
@@ -178,19 +192,37 @@ function Godmode:PlayerChat(args)
 
 					if not self.players[id] then
 						self:AddPlayer(p)
+
+						if args.player ~= p then
+							Chat:Send(args.player, "[Godmode] '" ..name .."' has been added to the Godmode list!", Color( 0, 255, 0))
+						end
 					else
-						Chat:Send(args.player, "[Godmode] " ..name .." is already in the Godmode list!", Color( 255, 0, 0))
+						Chat:Send(args.player, "[Godmode] '" ..name .."' is already in the Godmode list!", Color( 255, 0, 0))
 					end
 
-				elseif cmd_args[2] == "remove" and cmd_args[3] then
+				elseif cmd_args[2] == "remove" then
 
 					local p = {}
 					local id = 0
 					local name = ""
 
-					if cmd_args[3] ~= "." then
+					if cmd_args[3] ~= "." and cmd_args[3] ~= nil then
+
+						local referenceName = ""
+
+						--If a players name has spaces we decide to merge these to a full string
+						for i, namepart in pairs(cmd_args) do
+							if i < 3 then
+
+							elseif i == 3 then
+								referenceName = (referenceName ..namepart)
+							else
+								referenceName = (referenceName .." " ..namepart)
+							end
+						end
+
 						for player in Server:GetPlayers() do
-							if player:GetName() == cmd_args[3] then
+							if player:GetName() == referenceName then
 								if player:GetWorld():GetId() == 0 then
 
 									p = player
@@ -199,7 +231,7 @@ function Godmode:PlayerChat(args)
 
 									break
 								else
-									Chat:Send(args.player, "[Godmode] " ..cmd_args[3] .." is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+									Chat:Send(args.player, "[Godmode] '" ..referenceName .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
 
 									return false
 								end
@@ -207,7 +239,7 @@ function Godmode:PlayerChat(args)
 						end
 
 						if name == "" and id == 0 then
-							Chat:Send(args.player, "[Godmode] " ..cmd_args[3] .." was not found on the server and will be ignored!", Color( 255, 0, 0))
+							Chat:Send(args.player, "[Godmode] '" ..referenceName .."' was not found on the server and will be ignored!", Color( 255, 0, 0))
 
 							return false
 						end
@@ -219,8 +251,12 @@ function Godmode:PlayerChat(args)
 
 					if self.players[id] then
 						self:RemovePlayer(p)
+
+						if args.player ~= p then
+							Chat:Send(args.player, "[Godmode] '" ..name .."' has been removed from the Godmode list!", Color( 0, 255, 0))
+						end
 					else
-						Chat:Send(args.player, "[Godmode] " ..name .." is not in the Godmode list!", Color( 255, 0, 0))
+						Chat:Send(args.player, "[Godmode] '" ..name .."' is not in the Godmode list!", Color( 255, 0, 0))
 					end
 
 				elseif cmd_args[2] == "players" then
@@ -234,7 +270,7 @@ function Godmode:PlayerChat(args)
 
 					if playerExists == true then
 						for i, player in pairs(self.players) do
-							playerNames = playerNames .." " .. player:GetName() .. "(" .. player:GetSteamId().string .. ")"
+							playerNames = playerNames .." '" .. player:GetName() .. "' (" ..string.upper(tostring(self.playerStates[player:GetSteamId().string])) ..")" --.. player:GetSteamId().string .. ")"
 						end
 					else
 						playerNames = playerNames .." There are no players in the list of Godmode players!"

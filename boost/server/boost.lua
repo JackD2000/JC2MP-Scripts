@@ -34,6 +34,22 @@ function Boost:isAdmin(player)
 	return false
 end
 
+function Boost:AddPlayer(player)
+	self.playerValues[player:GetSteamId().string] = {name = player:GetName(), id = player:GetSteamId(), enabled = true, speed = 1}
+
+	Chat:Send(player, "[Boost] You have been added to the list of registered players!", Color(0, 255, 0))
+end
+
+function Boost:RemovePlayer(player)
+	if IsValid(player) then
+		if self.playerValues[player:GetSteamId().string] ~= nil then
+			self.playerValues[player:GetSteamId().string] = nil
+		end
+
+		Chat:Send(player, "[Boost] You have been removed from the list of Godmode players - You are now mortal again!", Color(0, 255, 0))
+	end
+end
+
 function Boost:Cooldown()
 	if #self.playerValues > 0 then
 		for i, p in pairs(self.playerValues) do
@@ -46,28 +62,44 @@ function Boost:Cooldown()
 	end
 end
 
-
 function Boost:PlayerChat(args)
 	local cmd_args = args.text:split(" ")
 
 	if cmd_args[1] == "/boost" then
 		if self:isAdmin(args.player) then
 			if cmd_args[2] then
-				if cmd_args[2] == "add" and cmd_args[3] then
+				if cmd_args[2] == "add" then
+
+					local p = {}
 					local id = 0
 					local name = ""
 
-					if cmd_args[3] ~= "." then
+					if cmd_args[3] ~= "." and cmd_args[3] ~= nil then
+
+						local referenceName = ""
+
+						--If a players name has spaces we decide to merge these to a full string
+						for i, namepart in pairs(cmd_args) do
+							if i < 3 then
+
+							elseif i == 3 then
+								referenceName = (referenceName ..namepart)
+							else
+								referenceName = (referenceName .." " ..namepart)
+							end
+						end
+
 						for player in Server:GetPlayers() do
-							if player:GetName() == cmd_args[3] then
+							if player:GetName() == referenceName then
 								if player:GetWorld():GetId() == 0 then
 
+									p = player
 									id = player:GetSteamId().string
 									name = player:GetName()
 
 									break
 								else
-									Chat:Send(args.player, "[Boost] " ..cmd_args[3] .." is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+									Chat:Send(args.player, "[Boost] '" ..referenceName .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
 
 									return false
 								end
@@ -75,39 +107,58 @@ function Boost:PlayerChat(args)
 						end
 
 						if name == "" and id == 0 then
-							Chat:Send(args.player, "[Boost] " ..cmd_args[3] .." was not found on the server and will be ignored!", Color( 255, 0, 0))
+							Chat:Send(args.player, "[Boost] '" ..referenceName .."' was not found on the server and will be ignored!", Color( 255, 0, 0))
 
 							return false
 						end
 					else
+						p = args.player
 						id = args.player:GetSteamId().string
 						name = args.player:GetName()
 					end
 
 					if not self.playerValues[id] then
-						self.playerValues[id] = {name = name, id = id, enabled = true, speed = 1}
+						self:AddPlayer(p)
 
-						Chat:Send(args.player, "[Boost] " ..name .." has been added to the list of registered players!", Color( 0, 255, 0))
+						if args.player ~= p then
+							Chat:Send(args.player, "[Boost] '" ..name .."' has been added to the list of registered players!", Color( 0, 255, 0))
+						end
 					else
-						Chat:Send(args.player, "[Boost] " ..name .." is already in the list of registered players!", Color( 255, 0, 0))
+						Chat:Send(args.player, "[Boost] '" ..name .."' is already in the list of registered players!", Color( 255, 0, 0))
 					end
 
-				elseif cmd_args[2] == "remove" and cmd_args[3] then
+				elseif cmd_args[2] == "remove" then
 
+					local p = {}
 					local id = 0
 					local name = ""
 
-					if cmd_args[3] ~= "." then
+					if cmd_args[3] ~= "." and cmd_args[3] ~= nil then
+						
+						local referenceName = ""
+
+						--If a players name has spaces we decide to merge these to a full string
+						for i, namepart in pairs(cmd_args) do
+							if i < 3 then
+
+							elseif i == 3 then
+								referenceName = (referenceName ..namepart)
+							else
+								referenceName = (referenceName .." " ..namepart)
+							end
+						end
+
 						for player in Server:GetPlayers() do
-							if player:GetName() == cmd_args[3] then
+							if player:GetName() == referenceName then
 								if player:GetWorld():GetId() == 0 then
 
+									p = player
 									id = player:GetSteamId().string
 									name = player:GetName()
 
 									break
 								else
-									Chat:Send(args.player, "[Boost] " ..cmd_args[3] .." is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+									Chat:Send(args.player, "[Boost] '" ..referenceName .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
 
 									return false
 								end
@@ -115,21 +166,24 @@ function Boost:PlayerChat(args)
 						end
 
 						if name == "" and id == 0 then
-							Chat:Send(args.player, "[Boost] " ..cmd_args[3] .." was not found on the server and will be ignored!", Color( 255, 0, 0))
+							Chat:Send(args.player, "[Boost] '" ..referenceName .."' was not found on the server and will be ignored!", Color( 255, 0, 0))
 
 							return false
 						end
 					else
+						p = args.player
 						id = args.player:GetSteamId().string
 						name = args.player:GetName()
 					end
 
 					if self.playerValues[id] then
-						self.playerValues[id] = nil
+						self:RemovePlayer(p)
 
-						Chat:Send(args.player, "[Boost] " ..name .." has been removed to the list of registered players!", Color( 0, 255, 0))
+						if args.player ~= p then
+							Chat:Send(args.player, "[Boost] '" ..name .."' has been removed to the list of registered players!", Color( 0, 255, 0))
+						end
 					else
-						Chat:Send(args.player, "[Boost] " ..name .." is not in the list of registered players!", Color( 255, 0, 0))
+						Chat:Send(args.player, "[Boost] '" ..name .."' is not in the list of registered players!", Color( 255, 0, 0))
 					end
 
 				elseif cmd_args[2] == "players" then
@@ -143,7 +197,7 @@ function Boost:PlayerChat(args)
 
 					if playerExists == true then
 						for i, player in pairs(self.playerValues) do
-							playerNames = playerNames .." " .. player.name .. "(" .. player.id .. ")"
+							playerNames = playerNames .." '" .. player.name .. "' (" ..string.upper(tostring(player.enabled)) ..")"
 						end
 					else
 						playerNames = playerNames .." There are no players in the list of registered players!"
