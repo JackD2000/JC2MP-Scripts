@@ -1,7 +1,6 @@
 class 'Godmode'
 
 function Godmode:__init()
-	
 	self.admins = {
 		"STEAM_0:0:26199873",
 		"STEAM_0:0:28323431",
@@ -49,6 +48,8 @@ function Godmode:AddPlayer(player)
 	self.players[player:GetSteamId().string] = player
 	self.playerStates[player:GetSteamId().string] = true
 
+	Network:Send(player, "GodmodeToggle", true)
+
 	Chat:Send(player, "[Godmode] You have been added to the list of Godmode players - You are now immortal!", Color(0, 255, 0))
 end
 
@@ -57,6 +58,8 @@ function Godmode:RemovePlayer(player)
 		if self.players[player:GetSteamId().string] ~= nil then
 			self.players[player:GetSteamId().string] = nil
 			self.playerStates[player:GetSteamId().string] = nil
+
+			Network:Send(player, "GodmodeToggle", false)
 		end
 
 		Chat:Send(player, "[Godmode] You have been removed from the list of Godmode players - You are now mortal again!", Color(0, 255, 0))
@@ -68,6 +71,8 @@ function Godmode:EnablePlayer(player)
 		if self.players[player:GetSteamId().string] ~= nil then
 			self.playerStates[player:GetSteamId().string] = true
 			
+			Network:Send(player, "GodmodeToggle", true)
+
 			Chat:Send(player, "[Godmode] You are now immortal!", Color(0, 255, 0))
 		end
 	end
@@ -78,6 +83,8 @@ function Godmode:DisablePlayer(player)
 		if self.players[player:GetSteamId().string] ~= nil then
 			self.playerStates[player:GetSteamId().string] = false
 			
+			Network:Send(player, "GodmodeToggle", false)
+
 			Chat:Send(player, "[Godmode] You are now mortal again!", Color(0, 255, 0))
 		end
 	end
