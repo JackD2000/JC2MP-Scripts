@@ -1,11 +1,63 @@
 
 class 'Boost'
 
+--We use this function to load the admins SteamIds into the admins table
+function Boost:LoadAdmins(filename)
+	local file = io.open(filename, "r")
+	local i = 0
+	local admins = {}
+
+	if file == nil then
+		print("[Boost] The supplied file was not found!")
+		return admins
+	end
+	
+	for line in file:lines() do
+		i = i + 1
+		
+		--We check if the admin line was commented out
+		if string.sub(line, 1, 2) ~= "--" then
+			admins[i] = line
+		end
+	end
+
+	file:close()
+
+	return admins
+end
+
+--[[	WIP
+
+--We use this function to load each registered players stored data 
+function Boost:LoadPlayers(filename)
+	local file = io.open(filename, "r")
+	local i = 0
+	local players = {}
+
+	--If there is no user file we can just ignore loading
+	if file == nil then
+		return
+	end
+	
+	for line in file:lines() do
+		i = i + 1
+		
+		--Check if the line was commented out
+		if string.sub(line, 1, 2) ~= "--" then
+			players[i] = line
+		end
+	end
+
+	file:close()
+
+	return admins
+end
+
+]]
+
 function Boost:__init()
-	self.admins = {
-		"STEAM_0:0:26199873",
-		"STEAM_0:0:28323431",
-	}
+	--Load all the admins!
+	self.admins = self:LoadAdmins("server/admins.txt")
 
 	--Instead of storing full sets of players we only store their associated values
 	self.playerValues = {}
@@ -112,9 +164,15 @@ function Boost:PlayerChat(args)
 							return false
 						end
 					else
-						p = args.player
-						id = args.player:GetSteamId().string
-						name = args.player:GetName()
+						if args.player:GetWorld():GetId() == 0 then
+							p = args.player
+							id = args.player:GetSteamId().string
+							name = args.player:GetName()
+						else
+							Chat:Send(args.player, "[Boost] '" ..args.player:GetName() .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+
+							return false
+						end
 					end
 
 					if not self.playerValues[id] then
@@ -171,9 +229,15 @@ function Boost:PlayerChat(args)
 							return false
 						end
 					else
-						p = args.player
-						id = args.player:GetSteamId().string
-						name = args.player:GetName()
+						if args.player:GetWorld():GetId() == 0 then
+							p = args.player
+							id = args.player:GetSteamId().string
+							name = args.player:GetName()
+						else
+							Chat:Send(args.player, "[Boost] '" ..args.player:GetName() .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+
+							return false
+						end
 					end
 
 					if self.playerValues[id] then
@@ -237,7 +301,7 @@ function Boost:PlayerChat(args)
 				end
 			end
 		else
-			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color( 255, 0, 0))
+			return false
 		end
 	end
  

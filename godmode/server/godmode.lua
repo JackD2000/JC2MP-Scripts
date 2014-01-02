@@ -1,13 +1,37 @@
 class 'Godmode'
 
+--We use this function to load the admins SteamIds into the admins table
+function Godmode:LoadAdmins(filename)
+	local file = io.open(filename, "r")
+	local i = 0
+	local admins = {}
+
+	if file == nil then
+		print("[Godmode] The supplied file was not found!")
+		return admins
+	end
+	
+	for line in file:lines() do
+		i = i + 1
+		
+		--We check if the admin line was commented out
+		if string.sub(line, 1, 2) ~= "--" then
+			admins[i] = line
+		end
+	end
+
+	file:close()
+
+	return admins
+end
+
 function Godmode:__init()
-	self.admins = {
-		"STEAM_0:0:26199873",
-		"STEAM_0:0:28323431",
-	}
+	--All you admins are belong to us!
+	self.admins = self:LoadAdmins("server/admins.txt")
 
 	self.players = {}
 	self.playerStates = {}
+
 	self.reviveList = {}
 	self.reviveCoords = {}
 
@@ -192,9 +216,15 @@ function Godmode:PlayerChat(args)
 							return false
 						end
 					else
-						p = args.player
-						id = args.player:GetSteamId().string
-						name = args.player:GetName()
+						if args.player:GetWorld():GetId() == 0 then
+							p = args.player
+							id = args.player:GetSteamId().string
+							name = args.player:GetName()
+						else
+							Chat:Send(args.player, "[Godmode] '" ..args.player:GetName() .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+
+							return false
+						end
 					end
 
 					if not self.players[id] then
@@ -251,9 +281,15 @@ function Godmode:PlayerChat(args)
 							return false
 						end
 					else
-						p = args.player
-						id = args.player:GetSteamId().string
-						name = args.player:GetName()
+						if args.player:GetWorld():GetId() == 0 then
+							p = args.player
+							id = args.player:GetSteamId().string
+							name = args.player:GetName()
+						else
+							Chat:Send(args.player, "[Godmode] '" ..args.player:GetName() .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+
+							return false
+						end
 					end
 
 					if self.players[id] then
@@ -313,7 +349,7 @@ function Godmode:PlayerChat(args)
 				end
 			end
 		else
-			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color( 255, 0, 0))
+			return false
 		end
 	end
  

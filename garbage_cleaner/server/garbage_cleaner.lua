@@ -20,11 +20,34 @@ local function round(num, idp)
 	return math.floor(num * mult + 0.5) / mult
 end
 
+--We use this function to load the admins SteamIds into the admins table
+function Garbagecleaner:LoadAdmins(filename)
+	local file = io.open(filename, "r")
+	local i = 0
+	local admins = {}
+
+	if file == nil then
+		print("[GarbageCleaner] The supplied file was not found!")
+		return admins
+	end
+	
+	for line in file:lines() do
+		i = i + 1
+		
+		--We check if the admin line was commented out
+		if string.sub(line, 1, 2) ~= "--" then
+			admins[i] = line
+		end
+	end
+
+	file:close()
+
+	return admins
+end
+
 function Garbagecleaner:__init()
-	self.admins = {
-		"STEAM_0:0:26199873",
-		"STEAM_0:0:28323431",
-	}
+	--We start off by loading the admins from the 'admins.txt' file
+	self.admins = self:LoadAdmins("server/admins.txt")
 
 	--Vehicles that should not be removed are added here
 	self.managedList = {}
@@ -149,8 +172,6 @@ function Garbagecleaner:PlayerChat(args)
 				return false
 			end
 		else
-			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color(255,  0,  0))
-
 			return false
 		end
 	end
