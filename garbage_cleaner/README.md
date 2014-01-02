@@ -19,6 +19,10 @@ All commands require admin status
     <td>Forces a garbage cleanup cycle</td>
   </tr>
   <tr>
+    <td>/cleanup time</td>
+    <td>Prints the time until the next cleanup cycle</td>
+  </tr>
+  <tr>
     <td>/cleanup reset</td>
     <td>Resets the garbage cleanup cycle</td>
   </tr>

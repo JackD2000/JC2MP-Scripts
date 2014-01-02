@@ -1,12 +1,3 @@
---[[
-		Vehicle boost - Created by Catlinman (https://twitter.com/Catlinman_)
-
-		As an Admin use shift to multiply your speed and ctrl to brake.
-
-		TODO:	-> Add different modes
-				-> Allow Admins to approve players for use
-				-> Possible GUI for configuration
-]]
 
 class 'Boost'
 
@@ -55,7 +46,6 @@ function Boost:Cooldown()
 	end
 end
 
---This shit is not the bomb T_T
 
 function Boost:PlayerChat(args)
 	local cmd_args = args.text:split(" ")
