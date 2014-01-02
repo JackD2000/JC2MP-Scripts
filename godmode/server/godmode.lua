@@ -1,18 +1,20 @@
 class 'Godmode'
 
 function Godmode:__init()
+	
 	self.admins = {
 		"STEAM_0:0:26199873",
 		"STEAM_0:0:28323431",
 	}
 
 	self.players = {}
+	self.playerStates = {}
 	self.reviveList = {}
 	self.reviveCoords = {}
 
 	Events:Subscribe("PlayerChat", 	self, self.PlayerChat)
 	Events:Subscribe("PlayerQuit", 	self, self.PlayerQuit)
-	Events:Subscribe("PreTick", 	self, self.KeepAlive)
+	Events:Subscribe("PostTick", 	self, self.KeepAlive)
 end
 
 function Godmode:isAdmin(player)
@@ -43,33 +45,40 @@ function Godmode:isGod(player)
 	return false
 end
 
---Deprecated since we now directly store the player.
---[[function Godmode:GetPlayerName(steamid)
-	for player in Server:GetPlayers() do
-		if steamid == player:GetSteamId().string then
-
-			return player:GetName()
-		end
-	end
-end]]
-
 function Godmode:AddPlayer(player)
 	self.players[player:GetSteamId().string] = player
+	self.playerStates[player:GetSteamId().string] = true
 
-	Chat:Send(player, "[Godmode] You are now immortal!", Color(0, 255, 0))
+	Chat:Send(player, "[Godmode] You have been added to the list of Godmode players - You are now immortal!", Color(0, 255, 0))
 end
 
 function Godmode:RemovePlayer(player)
-	for i, godPlayer in pairs(self.players) do
-		if player:GetSteamId().string == godPlayer:GetSteamId().string then
+	if IsValid(player) then
+		if self.players[player:GetSteamId().string] ~= nil then
+			self.players[player:GetSteamId().string] = nil
+			self.playerStates[player:GetSteamId().string] = nil
+		end
 
-			self.players[i] = nil
+		Chat:Send(player, "[Godmode] You have been removed from the list of Godmode players - You are now mortal again!", Color(0, 255, 0))
+	end
+end
 
-			if isValid(player) then
-				Chat:Send(player, "[Godmode] You are mortal again.", Color(0, 255, 0))
-			end
+function Godmode:EnablePlayer(player)
+	if IsValid(player) then
+		if self.players[player:GetSteamId().string] ~= nil then
+			self.playerStates[player:GetSteamId().string] = true
 			
-			return
+			Chat:Send(player, "[Godmode] You are now immortal!", Color(0, 255, 0))
+		end
+	end
+end
+
+function Godmode:DisablePlayer(player)
+	if IsValid(player) then
+		if self.players[player:GetSteamId().string] ~= nil then
+			self.playerStates[player:GetSteamId().string] = false
+			
+			Chat:Send(player, "[Godmode] You are now mortal again!", Color(0, 255, 0))
 		end
 	end
 end
@@ -77,24 +86,34 @@ end
 function Godmode:KeepAlive()
 	for i, player in pairs(self.players) do
 		if IsValid(player) then
-			if self:isGod(player) then
-				if player:GetHealth() ~= 1 then
-					if player:GetHealth() ~= 0 then
+			if self.playerStates[player:GetSteamId().string] == true then
+				if player:GetWorld():GetId() == 0 then
+					if self:isGod(player) then
+						if player:GetHealth() ~= 1 then
+							if player:GetHealth() ~= 0 then
 
-						player:SetHealth(1)
+								player:SetHealth(1)
 
-					elseif not self.reviveList[player:GetSteamId().string] then
-						self.reviveList[player:GetSteamId().string] = player
+							elseif not self.reviveList[player:GetSteamId().string] then
+								self.reviveList[player:GetSteamId().string] = player
 
-						self.reviveCoords[player:GetSteamId().string] = player:GetPosition()
+								self.reviveCoords[player:GetSteamId().string] = player:GetPosition()
+							end
+						end
+
+						local vehicle = player:GetVehicle()
+
+						if vehicle ~= nil then
+							if vehicle:GetHealth() ~= 1 then
+								vehicle:SetHealth(1)
+							end
+						end
 					end
-				end
+				else
+					if self:isGod(player) then
+						self.players[player:GetSteamId().string] = nil
 
-				local vehicle = player:GetVehicle()
-
-				if vehicle ~= nil then
-					if vehicle:GetHealth() ~= 1 then
-						vehicle:SetHealth(1)
+						Chat:Send(player, "[Godmode] You are not in the main world - You are now mortal again!", Color(50, 155, 255))
 					end
 				end
 			end
@@ -104,59 +123,157 @@ function Godmode:KeepAlive()
 	end
 
 	for i, player in pairs(self.reviveList) do
+
 		if player:GetHealth() ~= 0 then
 			player:Teleport(self.reviveCoords[player:GetSteamId().string], Angle())
 
 			self.reviveList[player:GetSteamId().string] = nil
 			self.reviveCoords[player:GetSteamId().string] = nil
+
+			Chat:Send(player, "[Godmode] You have been teleported to your death position!", Color(0, 255, 0))
 		end
 	end
 end
 
 function Godmode:PlayerChat(args)
-	if args.text == "/godmode" then
-		if self:isAdmin(args.player) or self:isGod(args.player) then
+	local cmd_args = args.text:split(" ")
 
-			if self:isGod(args.player) then
-				self:RemovePlayer(args.player)
-			else
-				self:AddPlayer(args.player)
-			end
-
-			return false
-		else
-			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color(255,  0,  0))
-		end
-	end
-
-	if args.text == "/gods" then
+	if cmd_args[1] == "/godmode" then
 		if self:isAdmin(args.player) then
+			if cmd_args[2] then
+				if cmd_args[2] == "add" and cmd_args[3] then
 
-			local godNames = "[Godmode]"
+					local p = nil
+					local id = 0
+					local name = ""
 
-			local playerExists = false
+					if cmd_args[3] ~= "." then
+						for player in Server:GetPlayers() do
+							if player:GetName() == cmd_args[3] then
+								if player:GetWorld():GetId() == 0 then
 
-			for i, p in pairs(self.players) do
-				playerExists = true
-			end
+									p = player
+									id = player:GetSteamId().string
+									name = player:GetName()
 
-			if playerExists then
+									break
+								else
+									Chat:Send(args.player, "[Godmode] " ..cmd_args[3] .." is currently not in the main world and will be ignored!", Color( 255, 0, 0))
 
-				for i, player in pairs(self.players) do
-					godNames = godNames .." " .. player:GetName() .. "(" .. player:GetSteamId().string .. ")"
+									return false
+								end
+							end
+						end
+
+						if name == "" and id == 0 then
+							Chat:Send(args.player, "[Godmode] " ..cmd_args[3] .." was not found on the server and will be ignored!", Color( 255, 0, 0))
+
+							return false
+						end
+					else
+						p = args.player
+						id = args.player:GetSteamId().string
+						name = args.player:GetName()
+					end
+
+					if not self.players[id] then
+						self:AddPlayer(p)
+					else
+						Chat:Send(args.player, "[Godmode] " ..name .." is already in the Godmode list!", Color( 255, 0, 0))
+					end
+
+				elseif cmd_args[2] == "remove" and cmd_args[3] then
+
+					local p = {}
+					local id = 0
+					local name = ""
+
+					if cmd_args[3] ~= "." then
+						for player in Server:GetPlayers() do
+							if player:GetName() == cmd_args[3] then
+								if player:GetWorld():GetId() == 0 then
+
+									p = player
+									id = player:GetSteamId().string
+									name = player:GetName()
+
+									break
+								else
+									Chat:Send(args.player, "[Godmode] " ..cmd_args[3] .." is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+
+									return false
+								end
+							end
+						end
+
+						if name == "" and id == 0 then
+							Chat:Send(args.player, "[Godmode] " ..cmd_args[3] .." was not found on the server and will be ignored!", Color( 255, 0, 0))
+
+							return false
+						end
+					else
+						p = args.player
+						id = args.player:GetSteamId().string
+						name = args.player:GetName()
+					end
+
+					if self.players[id] then
+						self:RemovePlayer(p)
+					else
+						Chat:Send(args.player, "[Godmode] " ..name .." is not in the Godmode list!", Color( 255, 0, 0))
+					end
+
+				elseif cmd_args[2] == "players" then
+					local playerNames = "[Godmode]"
+
+					local playerExists = false
+
+					for i, p in pairs(self.players) do
+						playerExists = true
+					end
+
+					if playerExists == true then
+						for i, player in pairs(self.players) do
+							playerNames = playerNames .." " .. player:GetName() .. "(" .. player:GetSteamId().string .. ")"
+						end
+					else
+						playerNames = playerNames .." There are no players in the list of Godmode players!"
+					end
+
+					Chat:Send(args.player, playerNames, Color(0, 255, 0))
+
+					return false
+				else
+					Chat:Send(args.player, "[Godmode] Invalid parameters - Options: '/godmode (add/remove/players) <name>'", Color( 255, 0, 0))
 				end
+
+				return false
 			else
-				godNames = godNames .." No one is currently in Godmode!"
+				if args.player:GetWorld():GetId() == 0 then
+					local id = args.player:GetSteamId().string
+
+					if self.players[id] == nil then
+						Chat:Send(args.player, "[Godmode] You are not in the Godmode list - Add yourself by typing '/godmode add .'", Color( 0, 255, 0))
+
+					else
+						if self.playerStates[id] == true then
+							self:DisablePlayer(args.player)
+
+						else
+							self:EnablePlayer(args.player)
+						end
+					end
+
+					return false
+				else
+					Chat:Send(args.player, "[Godmode] You must be in the main world to use this command.", Color( 255, 0, 0))
+				end
 			end
-
-			Chat:Send(args.player, godNames, Color(0, 255, 0))
-
-			return false
 		else
-			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color(255,  0,  0))
+			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color( 255, 0, 0))
 		end
 	end
-
+ 
 	return true
 end
 

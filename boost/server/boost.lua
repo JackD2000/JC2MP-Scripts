@@ -16,7 +16,10 @@ function Boost:__init()
 		"STEAM_0:0:28323431",
 	}
 
-	self.players = {}
+	--Instead of storing full sets of players we only store their associated values
+	self.playerValues = {}
+
+	--The amount of boost added each tick
 	self.boostAmount = 0.001
 
 	Network:Subscribe("BoostAccelerate", self, self.Accelerate)
@@ -41,41 +44,154 @@ function Boost:isAdmin(player)
 end
 
 function Boost:Cooldown()
-	if #self.players > 0 then
-		for i, p in pairs(self.players) do
-			if self.players[i].speed > 1 then
-				self.players[i].speed = self.players[i].speed - self.boostAmount / 100
+	if #self.playerValues > 0 then
+		for i, p in pairs(self.playerValues) do
+			if self.playerValues[i].speed > 1 then
+				self.playerValues[i].speed = self.playerValues[i].speed - self.boostAmount / 100
 			else
-				self.players[i].speed = 1
+				self.playerValues[i].speed = 1
 			end
 		end
 	end
 end
 
+--This shit is not the bomb T_T
+
 function Boost:PlayerChat(args)
-	if args.text == "/boost" then
+	local cmd_args = args.text:split(" ")
+
+	if cmd_args[1] == "/boost" then
 		if self:isAdmin(args.player) then
-			local id = args.player:GetSteamId()
+			if cmd_args[2] then
+				if cmd_args[2] == "add" and cmd_args[3] then
+					local id = 0
+					local name = ""
 
-			if self.players[tostring(id)] == nil then
+					if cmd_args[3] ~= "." then
+						for player in Server:GetPlayers() do
+							if player:GetName() == cmd_args[3] then
+								if player:GetWorld():GetId() == 0 then
 
-				self.players[tostring(id)] = {enabled = true, speed = 1}
+									id = player:GetSteamId().string
+									name = player:GetName()
 
-				Chat:Send(args.player, "Boost: You have been added to the boost list.", Color( 0, 255, 0))
-			else
-				if self.players[tostring(id)].enabled == true then
-					self.players[tostring(id)].enabled = false
+									break
+								else
+									Chat:Send(args.player, "[Boost] " ..cmd_args[3] .." is currently not in the main world and will be ignored!", Color( 255, 0, 0))
 
-					Chat:Send(args.player, "Boost: Your boost has been disabled.", Color( 0, 255, 0))
+									return false
+								end
+							end
+						end
 
+						if name == "" and id == 0 then
+							Chat:Send(args.player, "[Boost] " ..cmd_args[3] .." was not found on the server and will be ignored!", Color( 255, 0, 0))
+
+							return false
+						end
+					else
+						id = args.player:GetSteamId().string
+						name = args.player:GetName()
+					end
+
+					if not self.playerValues[id] then
+						self.playerValues[id] = {name = name, id = id, enabled = true, speed = 1}
+
+						Chat:Send(args.player, "[Boost] " ..name .." has been added to the list of registered players!", Color( 0, 255, 0))
+					else
+						Chat:Send(args.player, "[Boost] " ..name .." is already in the list of registered players!", Color( 255, 0, 0))
+					end
+
+				elseif cmd_args[2] == "remove" and cmd_args[3] then
+
+					local id = 0
+					local name = ""
+
+					if cmd_args[3] ~= "." then
+						for player in Server:GetPlayers() do
+							if player:GetName() == cmd_args[3] then
+								if player:GetWorld():GetId() == 0 then
+
+									id = player:GetSteamId().string
+									name = player:GetName()
+
+									break
+								else
+									Chat:Send(args.player, "[Boost] " ..cmd_args[3] .." is currently not in the main world and will be ignored!", Color( 255, 0, 0))
+
+									return false
+								end
+							end
+						end
+
+						if name == "" and id == 0 then
+							Chat:Send(args.player, "[Boost] " ..cmd_args[3] .." was not found on the server and will be ignored!", Color( 255, 0, 0))
+
+							return false
+						end
+					else
+						id = args.player:GetSteamId().string
+						name = args.player:GetName()
+					end
+
+					if self.playerValues[id] then
+						self.playerValues[id] = nil
+
+						Chat:Send(args.player, "[Boost] " ..name .." has been removed to the list of registered players!", Color( 0, 255, 0))
+					else
+						Chat:Send(args.player, "[Boost] " ..name .." is not in the list of registered players!", Color( 255, 0, 0))
+					end
+
+				elseif cmd_args[2] == "players" then
+					local playerNames = "[Boost]"
+
+					local playerExists = false
+
+					for i, p in pairs(self.playerValues) do
+						playerExists = true
+					end
+
+					if playerExists == true then
+						for i, player in pairs(self.playerValues) do
+							playerNames = playerNames .." " .. player.name .. "(" .. player.id .. ")"
+						end
+					else
+						playerNames = playerNames .." There are no players in the list of registered players!"
+					end
+
+					Chat:Send(args.player, playerNames, Color(0, 255, 0))
+
+					return false
 				else
-					self.players[tostring(id)].enabled = true
+					Chat:Send(args.player, "[Boost] Invalid parameters - Options: '/boost (add/remove/players) <name>'", Color( 255, 0, 0))
+				end
 
-					Chat:Send(args.player, "Boost: Your boost has been enabled.", Color( 0, 255, 0))
+				return false
+			else
+				if args.player:GetWorld():GetId() == 0 then
+					local id = args.player:GetSteamId().string
+
+					if self.playerValues[id] == nil then
+						Chat:Send(args.player, "[Boost] You are not in the list of registered players - Add yourself by typing '/boost add .'", Color( 0, 255, 0))
+
+					else
+						if self.playerValues[id].enabled == true then
+							self.playerValues[id].enabled = false
+
+							Chat:Send(args.player, "[Boost] Your boost has been disabled.", Color( 0, 255, 0))
+
+						else
+							self.playerValues[id].enabled = true
+
+							Chat:Send(args.player, "[Boost] Your boost has been enabled.", Color( 0, 255, 0))
+						end
+					end
+
+					return false
+				else
+					Chat:Send(args.player, "[Boost] You must be in the main world to use this command.", Color( 255, 0, 0))
 				end
 			end
-
-			return false
 		else
 			Chat:Send(args.player, "[SERVER] You must be an admin to use this command.", Color( 255, 0, 0))
 		end
@@ -86,37 +202,51 @@ end
 
 function Boost:Accelerate(args, client)
 	if client:GetWorld():GetId() == 0 then
-		if self.players[tostring(client:GetSteamId())] then
-			if self.players[tostring(client:GetSteamId())].enabled == true then
+		if self.playerValues[client:GetSteamId().string] then
+			if self.playerValues[client:GetSteamId().string].enabled == true then
 				local vehicle = client:GetVehicle()
 
 				if not IsValid(vehicle) then
 					return
 				end
 
-				self.players[tostring(client:GetSteamId())].speed = math.clamp(self.players[tostring(client:GetSteamId())].speed + self.boostAmount, 1, 1000)
+				self.playerValues[client:GetSteamId().string].speed = math.clamp(self.playerValues[client:GetSteamId().string].speed + self.boostAmount, 1, 1000)
 
-			 	client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * self.players[tostring(client:GetSteamId())].speed)
+				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * self.playerValues[client:GetSteamId().string].speed)
 			 end
 		 end
+	else
+		if self.playerValues[client:GetSteamId().string] then
+			if self.playerValues[client:GetSteamId().string].enabled == true then
+				Chat:Send(client, "[Boost] You are not in the main world - Your boost has been disabled.", Color(55, 155, 255))
+			end
+
+			self.playerValues[client:GetSteamId().string].enabled = false
+		end
 	end
 end
 
 function Boost:Brake(args, client)
 	if client:GetWorld():GetId() == 0 then
-		if self.players[tostring(client:GetSteamId())] then
-			if self.players[tostring(client:GetSteamId())].enabled == true then
+		if self.playerValues[client:GetSteamId().string] then
+			if self.playerValues[client:GetSteamId().string].enabled == true then
 				local vehicle = client:GetVehicle()
 
 				if not IsValid(vehicle) then
 					return
 				end
 
-				self.players[tostring(client:GetSteamId())].speed = math.clamp(self.players[tostring(client:GetSteamId())].speed - (self.boostAmount * 25), 1, 1000)
+				self.playerValues[client:GetSteamId().string].speed = math.clamp(self.playerValues[client:GetSteamId().string].speed - (self.boostAmount * 25), 1, 1000)
 
-				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * math.clamp(self.players[tostring(client:GetSteamId())].speed, 0, 1000))
+				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * math.clamp(self.playerValues[client:GetSteamId().string].speed, 0, 1000))
 			end
 		end
+	else
+		if self.playerValues[client:GetSteamId().string].enabled == true then
+			Chat:Send(client, "[Boost] You are not in the main world - Your boost has been disabled.", Color(255, 155, 55))
+		end
+
+		self.playerValues[client:GetSteamId().string].enabled = false
 	end
 end
 
