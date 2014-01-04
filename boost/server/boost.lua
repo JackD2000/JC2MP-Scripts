@@ -232,7 +232,9 @@ function Boost:PlayerChat(args)
 					local playerExists = false
 
 					for i, p in pairs(self.playerValues) do
-						playerExists = true
+						if IsValid(Player.GetById(p.localid)) then
+							playerExists = true
+						end
 					end
 
 					if playerExists == true then
@@ -337,7 +339,9 @@ function Boost:Brake(args, client)
 end
 
 function Boost:PlayerQuit(args)
-	self.playerValues[args.player:GetSteamId().string].enabled = false
+	if self.playerValues[args.player:GetSteamId().string] then
+		self.playerValues[args.player:GetSteamId().string].enabled = false
+	end
 end
 
 function Boost:ModuleUnload(args)

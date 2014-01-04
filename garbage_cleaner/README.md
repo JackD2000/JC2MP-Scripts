@@ -12,26 +12,26 @@ This plugin requires a modified freeroam plugin. The reason for this being that 
 
 Commands
 --------
-All commands require admin status
+The * indicates that 'cleanup' has to be the first argument - All commands require admin status
 <table>
   <tr>
     <td>/cleanup
     <td>Forces a garbage cleanup cycle</td>
   </tr>
   <tr>
-    <td>/cleanup time</td>
+    <td>/* time</td>
     <td>Prints the time until the next cleanup cycle</td>
   </tr>
   <tr>
-    <td>/cleanup reset</td>
+    <td>/* reset</td>
     <td>Resets the garbage cleanup cycle</td>
   </tr>
   <tr>
-    <td>/cleanup enable</td>
+    <td>/* enable</td>
     <td>Enables the garbage cleanup cycle</td>
   </tr>
   <tr>
-    <td>/cleanup disable</td>
+    <td>/* disable</td>
     <td>Disables the garbage cleanup cycle</td>
   </tr>
 </table>
@@ -40,3 +40,5 @@ Admins
 --------
 
 In the plugins server folder, make sure to insert the admins SteamId into the file admins.txt
+
+You can also temporally disable an admin by adding a '--' infront of the admins SteamId.

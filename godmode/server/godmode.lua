@@ -33,7 +33,6 @@ function Godmode:__init()
 	self.playerStates = {}
 
 	Events:Subscribe("PlayerChat", 		self, self.PlayerChat)
-	Events:Subscribe("PlayerJoin", 		self, self.PlayerJoin)
 	Events:Subscribe("PlayerQuit", 		self, self.PlayerQuit)
 	Events:Subscribe("ModuleUnload", 	self, self.ModuleUnload)
 end
@@ -221,7 +220,9 @@ function Godmode:PlayerChat(args)
 					local playerExists = false
 
 					for i, p in pairs(self.players) do
-						playerExists = true
+						if IsValid(p) then
+							playerExists = true
+						end
 					end
 
 					if playerExists == true then
@@ -278,7 +279,9 @@ function Godmode:PlayerJoin(args)
 end
 
 function Godmode:PlayerQuit(args)
-	self:DisablePlayer(args.player)
+	if self.players[args.player:GetSteamId().string] then
+		self:DisablePlayer(args.player)
+	end
 end
 
 function Godmode:ModuleUnload(args)
