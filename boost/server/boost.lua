@@ -237,7 +237,9 @@ function Boost:PlayerChat(args)
 
 					if playerExists == true then
 						for i, player in pairs(self.playerValues) do
-							playerNames = playerNames .." '" .. player.name .. "' (" ..string.upper(tostring(player.enabled)) ..")"
+							if IsValid(Player.GetById(player.localid)) then
+								playerNames = playerNames .." '" .. player.name .. "' (" ..string.upper(tostring(player.enabled)) ..")"
+							end
 						end
 					else
 						playerNames = playerNames .." There are no players in the list of registered players!"
