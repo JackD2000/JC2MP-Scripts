@@ -80,13 +80,19 @@ end
 function Godmode:RemovePlayer(player)
 	if IsValid(player) then
 		if self.players[player:GetSteamId().string] ~= nil then
+			local godstring = " - You are now mortal again"
+
+			if self.playerStates[player:GetSteamId().string] == false then
+				godstring = ""
+			end
+
 			self.players[player:GetSteamId().string] = nil
 			self.playerStates[player:GetSteamId().string] = nil
 
 			Network:Send(player, "GodmodeToggle", false)
-		end
 
-		Chat:Send(player, "[Godmode] You have been removed from the list of Godmode players - You are now mortal again!", Color(0, 255, 0))
+			Chat:Send(player, "[Godmode] You have been removed from the list of Godmode players" ..godstring .."!", Color(0, 255, 0))
+		end
 	end
 end
 
@@ -142,9 +148,17 @@ function Godmode:KeepAlive()
 					end
 				else
 					if self:isGod(player) then
-						self.players[player:GetSteamId().string] = nil
+						self.playerStates[player:GetSteamId().string] = false
+			
+						local godstring = " - You are now mortal again"
 
-						Chat:Send(player, "[Godmode] You are not in the main world - You are now mortal again!", Color(50, 155, 255))
+						if self.playerStates[player:GetSteamId().string] == false then
+							godstring = ""
+						end
+
+						Network:Send(player, "GodmodeToggle", false)
+
+						Chat:Send(player, "[Godmode] You are not in the main world" ..godstring .."!", Color(50, 155, 255))
 					end
 				end
 			end
@@ -196,18 +210,12 @@ function Godmode:PlayerChat(args)
 
 						for player in Server:GetPlayers() do
 							if player:GetName() == referenceName then
-								if player:GetWorld():GetId() == 0 then
 
-									p = player
-									id = player:GetSteamId().string
-									name = player:GetName()
+								p = player
+								id = player:GetSteamId().string
+								name = player:GetName()
 
-									break
-								else
-									Chat:Send(args.player, "[Godmode] '" ..referenceName .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
-
-									return false
-								end
+								break
 							end
 						end
 
@@ -217,15 +225,9 @@ function Godmode:PlayerChat(args)
 							return false
 						end
 					else
-						if args.player:GetWorld():GetId() == 0 then
-							p = args.player
-							id = args.player:GetSteamId().string
-							name = args.player:GetName()
-						else
-							Chat:Send(args.player, "[Godmode] '" ..args.player:GetName() .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
-
-							return false
-						end
+						p = args.player
+						id = args.player:GetSteamId().string
+						name = args.player:GetName()
 					end
 
 					if not self.players[id] then
@@ -261,18 +263,11 @@ function Godmode:PlayerChat(args)
 
 						for player in Server:GetPlayers() do
 							if player:GetName() == referenceName then
-								if player:GetWorld():GetId() == 0 then
+								p = player
+								id = player:GetSteamId().string
+								name = player:GetName()
 
-									p = player
-									id = player:GetSteamId().string
-									name = player:GetName()
-
-									break
-								else
-									Chat:Send(args.player, "[Godmode] '" ..referenceName .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
-
-									return false
-								end
+								break
 							end
 						end
 
@@ -282,15 +277,9 @@ function Godmode:PlayerChat(args)
 							return false
 						end
 					else
-						if args.player:GetWorld():GetId() == 0 then
-							p = args.player
-							id = args.player:GetSteamId().string
-							name = args.player:GetName()
-						else
-							Chat:Send(args.player, "[Godmode] '" ..args.player:GetName() .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
-
-							return false
-						end
+						p = args.player
+						id = args.player:GetSteamId().string
+						name = args.player:GetName()
 					end
 
 					if self.players[id] then

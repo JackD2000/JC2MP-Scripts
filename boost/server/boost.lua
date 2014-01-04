@@ -143,18 +143,11 @@ function Boost:PlayerChat(args)
 
 						for player in Server:GetPlayers() do
 							if player:GetName() == referenceName then
-								if player:GetWorld():GetId() == 0 then
+								p = player
+								id = player:GetSteamId().string
+								name = player:GetName()
 
-									p = player
-									id = player:GetSteamId().string
-									name = player:GetName()
-
-									break
-								else
-									Chat:Send(args.player, "[Boost] '" ..referenceName .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
-
-									return false
-								end
+								break
 							end
 						end
 
@@ -164,15 +157,9 @@ function Boost:PlayerChat(args)
 							return false
 						end
 					else
-						if args.player:GetWorld():GetId() == 0 then
-							p = args.player
-							id = args.player:GetSteamId().string
-							name = args.player:GetName()
-						else
-							Chat:Send(args.player, "[Boost] '" ..args.player:GetName() .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
-
-							return false
-						end
+						p = args.player
+						id = args.player:GetSteamId().string
+						name = args.player:GetName()
 					end
 
 					if not self.playerValues[id] then
@@ -208,18 +195,11 @@ function Boost:PlayerChat(args)
 
 						for player in Server:GetPlayers() do
 							if player:GetName() == referenceName then
-								if player:GetWorld():GetId() == 0 then
+								p = player
+								id = player:GetSteamId().string
+								name = player:GetName()
 
-									p = player
-									id = player:GetSteamId().string
-									name = player:GetName()
-
-									break
-								else
-									Chat:Send(args.player, "[Boost] '" ..referenceName .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
-
-									return false
-								end
+								break
 							end
 						end
 
@@ -229,15 +209,9 @@ function Boost:PlayerChat(args)
 							return false
 						end
 					else
-						if args.player:GetWorld():GetId() == 0 then
-							p = args.player
-							id = args.player:GetSteamId().string
-							name = args.player:GetName()
-						else
-							Chat:Send(args.player, "[Boost] '" ..args.player:GetName() .."' is currently not in the main world and will be ignored!", Color( 255, 0, 0))
-
-							return false
-						end
+						p = args.player
+						id = args.player:GetSteamId().string
+						name = args.player:GetName()
 					end
 
 					if self.playerValues[id] then
@@ -344,9 +318,9 @@ function Boost:Brake(args, client)
 					return
 				end
 
-				self.playerValues[client:GetSteamId().string].speed = math.clamp(self.playerValues[client:GetSteamId().string].speed - (self.boostAmount * 25), 1, 1000)
+				self.playerValues[client:GetSteamId().string].speed = math.lerp(self.playerValues[client:GetSteamId().string].speed, 0, 0.01)
 
-				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * math.clamp(self.playerValues[client:GetSteamId().string].speed, 0, 1000))
+				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * self.playerValues[client:GetSteamId().string].speed)
 			end
 		end
 	else

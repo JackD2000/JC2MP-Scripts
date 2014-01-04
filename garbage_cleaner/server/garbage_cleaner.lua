@@ -1,16 +1,15 @@
 --[[	
-		Garbage cleaner - Created by Catlinman (https://twitter.com/Catlinman_)
+	Garbage cleaner - Created by Catlinman (https://twitter.com/Catlinman_)
 
-		This script makes sure that no vehicles spawned through other plugins like the metatank
-		plugin remain for too long cluttering the server. It uses a timer to remove vehicles
-		after a certain interval if they are not being occupied. The default interval is 30 minutes.
-		I have also modified the freeroam plugin to only reload vehicles if the event 'ReloadVehicles'
-		is fired. This way, vehicles are removed and then reloaded in the freeroam plugin after they have
-		been removed here.
+	This script makes sure that no vehicles spawned through other plugins like the metatank
+	plugin remain for too long cluttering the server. It uses a timer to remove vehicles
+	after a certain interval if they are not being occupied. The default interval is 30 minutes.
+	I have also modified the freeroam plugin to only reload vehicles if the event 'ReloadVehicles'
+	is fired. This way, vehicles are removed and then reloaded in the freeroam plugin after they have
+	been removed here.
 
-		The freeroam plugin has also been modified to use a fixed spawns.txt file location for easier management.
+	The freeroam plugin has also been modified to use a fixed spawns.txt file location for easier management.
 ]]
-
 
 class 'Garbagecleaner'
 
@@ -188,20 +187,19 @@ function Garbagecleaner:Cleanup()
 
 	--We check if managed vehicles are still in the game. If not, remove them from the list.
 	for i, v in pairs(self.managedList) do
-		for v2 in v:GetWorld():GetVehicles() do
-			if v == v2 then return end
+		if not IsValid(v) then
+			self.managedList[i] = nil
 		end
-
-		v = nil
 	end
 
 	local count = 0
-
+	
 	for v in Server:GetVehicles() do
 		if not self.managedList[v:GetId()] then
 			if v:GetWorld():GetId() == 0 then
 				if #v:GetOccupants() == 0 then
 					count = count + 1
+
 					v:Remove()
 				end
 			end
