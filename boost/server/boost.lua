@@ -66,7 +66,6 @@ function Boost:__init()
 	self.boostAmount = 0.001
 
 	Network:Subscribe("BoostAccelerate", self, self.Accelerate)
-	Network:Subscribe("BoostBrake", self, self.Brake)
 
 	Events:Subscribe("PostTick", self, self.Cooldown)
 	Events:Subscribe("PlayerChat", self, self.PlayerChat)
@@ -255,33 +254,39 @@ function Boost:PlayerChat(args)
 				end
 
 				return false
+			end
+		end
+
+		if args.player:GetWorld():GetId() == 0 then
+			local id = args.player:GetSteamId().string
+
+			if self.playerValues[id] == nil then
+				if self:isAdmin(args.player) then
+					Chat:Send(args.player, "[Boost] You are not in the list of registered players - Add yourself by typing '/boost add .'", Color( 0, 255, 0))
+				end
+
+				return false
 			else
-				if args.player:GetWorld():GetId() == 0 then
-					local id = args.player:GetSteamId().string
+				if self.playerValues[id].enabled == true then
+					self.playerValues[id].enabled = false
 
-					if self.playerValues[id] == nil then
-						Chat:Send(args.player, "[Boost] You are not in the list of registered players - Add yourself by typing '/boost add .'", Color( 0, 255, 0))
-
-					else
-						if self.playerValues[id].enabled == true then
-							self.playerValues[id].enabled = false
-
-							Chat:Send(args.player, "[Boost] Your boost has been disabled.", Color( 0, 255, 0))
-
-						else
-							self.playerValues[id].enabled = true
-
-							Chat:Send(args.player, "[Boost] Your boost has been enabled.", Color( 0, 255, 0))
-						end
-					end
+					Chat:Send(args.player, "[Boost] Your boost has been disabled.", Color( 0, 255, 0))
 
 					return false
 				else
-					Chat:Send(args.player, "[Boost] You must be in the main world to use this command.", Color( 255, 0, 0))
+					self.playerValues[id].enabled = true
+
+					Chat:Send(args.player, "[Boost] Your boost has been enabled.", Color( 0, 255, 0))
+
+					return false
 				end
 			end
 		else
-			return false
+			if self:isAdmin(args.player) or self.playerValues[id] ~= nil then
+				Chat:Send(args.player, "[Boost] You must be in the main world to use this command.", Color( 255, 0, 0))
+
+				return false
+			end
 		end
 	end
  
@@ -311,30 +316,6 @@ function Boost:Accelerate(args, client)
 
 			self.playerValues[client:GetSteamId().string].enabled = false
 		end
-	end
-end
-
-function Boost:Brake(args, client)
-	if client:GetWorld():GetId() == 0 then
-		if self.playerValues[client:GetSteamId().string] then
-			if self.playerValues[client:GetSteamId().string].enabled == true then
-				local vehicle = client:GetVehicle()
-
-				if not IsValid(vehicle) then
-					return
-				end
-
-				self.playerValues[client:GetSteamId().string].speed = math.lerp(self.playerValues[client:GetSteamId().string].speed, 0, 0.01)
-
-				client:GetVehicle():SetLinearVelocity(client:GetVehicle():GetLinearVelocity() * self.playerValues[client:GetSteamId().string].speed)
-			end
-		end
-	else
-		if self.playerValues[client:GetSteamId().string].enabled == true then
-			Chat:Send(client, "[Boost] You are not in the main world - Your boost has been disabled.", Color(255, 155, 55))
-		end
-
-		self.playerValues[client:GetSteamId().string].enabled = false
 	end
 end
 

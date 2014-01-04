@@ -3,11 +3,11 @@ class 'Godmode'
 function Godmode:__init()
 	self.enabled = false
 
+	Game:FireEvent("ply.vulnerable")
+
 	Events:Subscribe("LocalPlayerBulletHit", self, self.HandleDamage)
 	Events:Subscribe("LocalPlayerExplosionHit", self, self.HandleDamage)
 	Events:Subscribe("LocalPlayerForcePulseHit", self, self.HandleDamage)
-
-	Events:Subscribe("PlayerQuit", self, self.LeaveServer)
 
 	Network:Subscribe("GodmodeToggle", self, self.GodmodeToggle)
 end
@@ -22,10 +22,6 @@ function Godmode:GodmodeToggle(args)
 	else
 		Game:FireEvent("ply.vulnerable")
 	end
-end
-
-function Godmode:LeaveServer(args)
-	self:GodmodeToggle(false)
 end
 
 function Godmode:HandleDamage(args)

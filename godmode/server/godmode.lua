@@ -26,13 +26,20 @@ function Godmode:LoadAdmins(filename)
 end
 
 function Godmode:__init()
+	--The time between ticks in milliseconds (Default 1000)
+	self.interval = 1000
+
 	--All you admins are belong to us!
 	self.admins = self:LoadAdmins("server/admins.txt")
+
+	self.timer = Timer()
 
 	self.players = {}
 	self.playerStates = {}
 
+	Events:Subscribe("PreTick",			self, self.Tick)
 	Events:Subscribe("PlayerChat", 		self, self.PlayerChat)
+	Events:Subscribe("PlayerJoin",		self, self.PlayerJoin)
 	Events:Subscribe("PlayerQuit", 		self, self.PlayerQuit)
 	Events:Subscribe("ModuleUnload", 	self, self.ModuleUnload)
 end
@@ -61,45 +68,66 @@ function Godmode:AddPlayer(player)
 end
 
 function Godmode:RemovePlayer(player)
-	if IsValid(player) then
-		if self.players[player:GetSteamId().string] ~= nil then
-			local godstring = " - You are now mortal again"
+	if self.players[player:GetSteamId().string] ~= nil then
+		local godstring = " - You are now mortal again"
 
-			if self.playerStates[player:GetSteamId().string] == false then
-				godstring = ""
-			end
-
-			self.players[player:GetSteamId().string] = nil
-			self.playerStates[player:GetSteamId().string] = nil
-
-			Network:Send(player, "GodmodeToggle", false)
-
-			Chat:Send(player, "[Godmode] You have been removed from the list of Godmode players" ..godstring .."!", Color(0, 255, 0))
+		if self.playerStates[player:GetSteamId().string] == false then
+			godstring = ""
 		end
+
+		self.players[player:GetSteamId().string] = nil
+		self.playerStates[player:GetSteamId().string] = nil
+
+		Network:Send(player, "GodmodeToggle", false)
+
+		Chat:Send(player, "[Godmode] You have been removed from the list of Godmode players" ..godstring .."!", Color(0, 255, 0))
 	end
 end
 
 function Godmode:EnablePlayer(player)
-	if IsValid(player) then
-		if self.players[player:GetSteamId().string] ~= nil then
-			self.playerStates[player:GetSteamId().string] = true
-			
-			Network:Send(player, "GodmodeToggle", true)
+	if self.players[player:GetSteamId().string] ~= nil then
+		self.playerStates[player:GetSteamId().string] = true
+		
+		Network:Send(player, "GodmodeToggle", true)
 
-			Chat:Send(player, "[Godmode] You are now immortal!", Color(0, 255, 0))
-		end
+		Chat:Send(player, "[Godmode] You are now immortal!", Color(0, 255, 0))
 	end
 end
 
 function Godmode:DisablePlayer(player)
-	if IsValid(player) then
-		if self.players[player:GetSteamId().string] ~= nil then
-			self.playerStates[player:GetSteamId().string] = false
-			
-			Network:Send(player, "GodmodeToggle", false)
+	if self.players[player:GetSteamId().string] ~= nil then
+		self.playerStates[player:GetSteamId().string] = false
+		
+		Network:Send(player, "GodmodeToggle", false)
 
-			Chat:Send(player, "[Godmode] You are now mortal again!", Color(0, 255, 0))
+		Chat:Send(player, "[Godmode] You are now mortal again!", Color(0, 255, 0))
+	end
+end
+
+function Godmode:Tick(args)
+	if self.timer:GetMilliseconds() > self.interval then
+		for i, player in pairs(self.players) do
+			if IsValid(player) then
+				if self.playerStates[player:GetSteamId().string] == true then
+					if player:GetWorld():GetId() == 0 then
+
+						player:SetHealth(1)
+
+						local vehicle = player:GetVehicle()
+
+						if vehicle then
+							vehicle:SetHealth(1)
+						end
+					else
+						self.playerStates[player:GetSteamId().string] = false
+
+						Chat:Send(client, "[Godmode] You are not in the main world - You are now mortal again.", Color(55, 155, 255))
+					end
+				end
+			end
 		end
+
+		self.timer:Restart()
 	end
 end
 
@@ -243,29 +271,34 @@ function Godmode:PlayerChat(args)
 				end
 
 				return false
-			else
-				if args.player:GetWorld():GetId() == 0 then
-					local id = args.player:GetSteamId().string
+			end
+		end
 
-					if self.players[id] == nil then
-						Chat:Send(args.player, "[Godmode] You are not in the Godmode list - Add yourself by typing '/godmode add .'", Color( 0, 255, 0))
+		if args.player:GetWorld():GetId() == 0 then
+			local id = args.player:GetSteamId().string
 
-					else
-						if self.playerStates[id] == true then
-							self:DisablePlayer(args.player)
-
-						else
-							self:EnablePlayer(args.player)
-						end
-					end
-
-					return false
-				else
-					Chat:Send(args.player, "[Godmode] You must be in the main world to use this command.", Color( 255, 0, 0))
+			if self.players[id] == nil then
+				if self:isAdmin(args.player) then
+					Chat:Send(args.player, "[Godmode] You are not in the Godmode list - Add yourself by typing '/godmode add .'", Color( 0, 255, 0))
 				end
+
+				return false
+			else
+				if self.playerStates[id] == true then
+					self:DisablePlayer(args.player)
+
+				else
+					self:EnablePlayer(args.player)
+				end
+
+				return false
 			end
 		else
-			return false
+			if self:isAdmin(args.player) or self.players[id] ~= nil then
+				Chat:Send(args.player, "[Godmode] You must be in the main world to use this command.", Color( 255, 0, 0))
+
+				return false
+			end
 		end
 	end
  
