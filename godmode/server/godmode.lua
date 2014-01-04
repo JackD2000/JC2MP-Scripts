@@ -32,11 +32,10 @@ function Godmode:__init()
 	self.players = {}
 	self.playerStates = {}
 
-	self.reviveList = {}
-	self.reviveCoords = {}
-
-	Events:Subscribe("PlayerChat", 	self, self.PlayerChat)
-	Events:Subscribe("PlayerQuit", 	self, self.PlayerQuit)
+	Events:Subscribe("PlayerChat", 		self, self.PlayerChat)
+	Events:Subscribe("PlayerJoin", 		self, self.PlayerJoin)
+	Events:Subscribe("PlayerQuit", 		self, self.PlayerQuit)
+	Events:Subscribe("ModuleUnload", 	self, self.ModuleUnload)
 end
 
 function Godmode:isAdmin(player)
@@ -227,7 +226,9 @@ function Godmode:PlayerChat(args)
 
 					if playerExists == true then
 						for i, player in pairs(self.players) do
-							playerNames = playerNames .." '" .. player:GetName() .. "' (" ..string.upper(tostring(self.playerStates[player:GetSteamId().string])) ..")" --.. player:GetSteamId().string .. ")"
+							if IsValid(player) then
+								playerNames = playerNames .." '" .. player:GetName() .. "' (" ..string.upper(tostring(self.playerStates[player:GetSteamId().string])) ..")" --.. player:GetSteamId().string .. ")"
+							end
 						end
 					else
 						playerNames = playerNames .." There are no players in the list of Godmode players!"
@@ -270,8 +271,28 @@ function Godmode:PlayerChat(args)
 	return true
 end
 
+function Godmode:PlayerJoin(args)
+	if self.players[args.player:GetSteamId().string] ~= nil then
+		self.players[args.player:GetSteamId().string] = args.player
+	end
+end
+
 function Godmode:PlayerQuit(args)
-	self:RemovePlayer(args.player)
+	self:DisablePlayer(args.player)
+end
+
+function Godmode:ModuleUnload(args)
+	for i, player in pairs(self.players) do
+		if IsValid(player) then
+			if self.playerStates[player:GetSteamId().string] == true then
+				self.playerStates[player:GetSteamId().string] = false
+				
+				Network:Send(player, "GodmodeToggle", false)
+
+				Chat:Send(player, "[Godmode] Module unloaded - You are now mortal again!", Color(255, 155, 55))
+			end
+		end
+	end
 end
 
 local godmode = Godmode()

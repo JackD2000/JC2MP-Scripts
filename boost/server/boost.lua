@@ -70,6 +70,8 @@ function Boost:__init()
 
 	Events:Subscribe("PostTick", self, self.Cooldown)
 	Events:Subscribe("PlayerChat", self, self.PlayerChat)
+	Events:Subscribe("PlayerQuit", 	self, self.PlayerQuit)
+	Events:Subscribe("ModuleUnload", 	self, self.ModuleUnload)
 end
 
 function Boost:isAdmin(player)
@@ -87,7 +89,7 @@ function Boost:isAdmin(player)
 end
 
 function Boost:AddPlayer(player)
-	self.playerValues[player:GetSteamId().string] = {name = player:GetName(), id = player:GetSteamId(), enabled = true, speed = 1}
+	self.playerValues[player:GetSteamId().string] = {name = player:GetName(), id = player:GetSteamId(), localid = player:GetId(), enabled = true, speed = 1}
 
 	Chat:Send(player, "[Boost] You have been added to the list of registered players!", Color(0, 255, 0))
 end
@@ -329,6 +331,20 @@ function Boost:Brake(args, client)
 		end
 
 		self.playerValues[client:GetSteamId().string].enabled = false
+	end
+end
+
+function Boost:PlayerQuit(args)
+	self.playerValues[args.player:GetSteamId().string].enabled = false
+end
+
+function Boost:ModuleUnload(args)
+	for i, player in pairs(self.playerValues) do
+		if player.enabled == true then
+			player.enabled = false
+
+			Chat:Send(Player.GetById(player.localid), "[Boost] Module unloaded - Your boost has been disabled.", Color(255, 155, 55))
+		end
 	end
 end
 
