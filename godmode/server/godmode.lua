@@ -37,7 +37,6 @@ function Godmode:__init()
 
 	Events:Subscribe("PlayerChat", 	self, self.PlayerChat)
 	Events:Subscribe("PlayerQuit", 	self, self.PlayerQuit)
-	Events:Subscribe("PostTick", 	self, self.KeepAlive)
 end
 
 function Godmode:isAdmin(player)
@@ -48,20 +47,6 @@ function Godmode:isAdmin(player)
 	end
 
 	if string.match(adminstring, player:GetSteamId().string) then
-		return true
-	end
-
-	return false
-end
-
-function Godmode:isGod(player)
-	local godstring = ""
-
-	for i, godPlayer in pairs(self.players) do
-		godstring = godstring .. godPlayer:GetSteamId().string .. " "
-	end
-
-	if string.match(godstring, player:GetSteamId().string) then
 		return true
 	end
 
@@ -116,67 +101,6 @@ function Godmode:DisablePlayer(player)
 			Network:Send(player, "GodmodeToggle", false)
 
 			Chat:Send(player, "[Godmode] You are now mortal again!", Color(0, 255, 0))
-		end
-	end
-end
-
-function Godmode:KeepAlive()
-	for i, player in pairs(self.players) do
-		if IsValid(player) then
-			if self.playerStates[player:GetSteamId().string] == true then
-				if player:GetWorld():GetId() == 0 then
-					if self:isGod(player) then
-						if player:GetHealth() ~= 1 then
-							if player:GetHealth() ~= 0 then
-
-								player:SetHealth(1)
-
-							elseif not self.reviveList[player:GetSteamId().string] then
-								self.reviveList[player:GetSteamId().string] = player
-
-								self.reviveCoords[player:GetSteamId().string] = player:GetPosition()
-							end
-						end
-
-						local vehicle = player:GetVehicle()
-
-						if vehicle ~= nil then
-							if vehicle:GetHealth() ~= 1 then
-								vehicle:SetHealth(1)
-							end
-						end
-					end
-				else
-					if self:isGod(player) then
-						self.playerStates[player:GetSteamId().string] = false
-			
-						local godstring = " - You are now mortal again"
-
-						if self.playerStates[player:GetSteamId().string] == false then
-							godstring = ""
-						end
-
-						Network:Send(player, "GodmodeToggle", false)
-
-						Chat:Send(player, "[Godmode] You are not in the main world" ..godstring .."!", Color(50, 155, 255))
-					end
-				end
-			end
-		else
-			self.players[i] = nil
-		end
-	end
-
-	for i, player in pairs(self.reviveList) do
-		if IsValid(player) then
-			if player:GetHealth() ~= 0 then
-				player:Teleport(self.reviveCoords[player:GetSteamId().string], Angle())
-
-				self.reviveList[player:GetSteamId().string] = nil
-				self.reviveCoords[player:GetSteamId().string] = nil
-
-				Chat:Send(player, "[Godmode] You have been teleported to your death position!", Color(0, 255, 0))
-			end
 		end
 	end
 end
