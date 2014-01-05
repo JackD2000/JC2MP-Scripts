@@ -8,8 +8,7 @@ The plugin makes every player who has been registered by an admin invincible.
 
 Commands
 --------
-
-The * indicates that 'godmode' has to be the first argument - The &lt;name&gt; space indicates that a players username can be entered here. You can also leave it empty or write '.' to reference your own username.
+The &lt;name&gt; space indicates that a players username can be entered here. You can also leave it empty or write '.' to reference your own username.
 
 <table>
   <tr>
@@ -17,15 +16,15 @@ The * indicates that 'godmode' has to be the first argument - The &lt;name&gt; s
     <td>Enables or disables godmode if the player is in the list of registered players</td>
   </tr>
   <tr>
-    <td>/* add &lt;name&gt;</td>
+    <td>/godmode add &lt;name&gt;</td>
     <td>Adds a player to the list of registered players (Requires admin status)</td>
   </tr>
   <tr>
-    <td>/* remove &lt;name&gt;</td>
+    <td>/godmode remove &lt;name&gt;</td>
     <td>Removes a player from the list of registered players (Requires admin status)</td>
   </tr>
 <tr>
-	<td>/* players
+	<td>/godmode players
 	<td>Lists all registered players (Requires admin status - Offline players are ignored)
 </tr>
 </table>
@@ -33,7 +32,7 @@ The * indicates that 'godmode' has to be the first argument - The &lt;name&gt; s
 Admins
 --------
 
-In the plugins server folder, make sure to insert the admins SteamId into the file admins.txt
+In the plugin's server folder, make sure to insert the admin's SteamId into the file admins.txt
 
-You can also temporally disable an admin by adding a '--' infront of the admins SteamId.
+You can also temporarily disable an admin by adding '--' infront of the admin's SteamId.
 
