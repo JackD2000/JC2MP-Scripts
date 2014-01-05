@@ -556,17 +556,22 @@ function admin:PlayerChat(args)
 		sender:Teleport(Vector3(pos.x, pos.y - 10,  pos.z), sender:GetAngle())
 		confirmationMessage(sender, "Down we go.")
 	end
-		
+
 	
 	if(isAdmin(args.player)) then
 		local text = args.text
 		if string.sub(text, 1, 1) ~= "/" then
-			Chat:Broadcast(adminPrefix .. args.player:GetName() .. ": " .. text, Color(255, 48, 48))
+			if args.player:GetName() == "Jokler" then
+				Chat:Broadcast(adminPrefix .. args.player:GetName() .. ": " .. text, Color(120, 120, 255))
+			elseif args.player:GetName() == "Catlinman" then
+				Chat:Broadcast(adminPrefix .. args.player:GetName() .. ": " .. text, Color(255, 180, 60))
+			else
+				Chat:Broadcast(adminPrefix .. args.player:GetName() .. ": " .. text, Color(200, 48, 48))
+			end
+			print("[" .. args.player:GetName() .. "] " .. text)
 			return false
 		end
 	end
-	
-
 end
 
 admin = admin()

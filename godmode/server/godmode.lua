@@ -121,7 +121,7 @@ function Godmode:Tick(args)
 					else
 						self.playerStates[player:GetSteamId().string] = false
 
-						Chat:Send(client, "[Godmode] You are not in the main world - You are now mortal again.", Color(55, 155, 255))
+						Chat:Send(player, "[Godmode] You are not in the main world - You are now mortal again.", Color(55, 155, 255))
 					end
 				end
 			end
