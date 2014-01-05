@@ -45,7 +45,7 @@ function Boost:LoadPlayers(filename)
 
 	--If there is no user file we can just ignore loading
 	if file == nil then
-		return
+		return players
 	end
 	
 	for line in file:lines() do

@@ -46,7 +46,7 @@ function Godmode:LoadPlayers(filename)
 
 	--If there is no user file we can just ignore loading
 	if file == nil then
-		return
+		return players, playerStates
 	end
 	
 	for line in file:lines() do
@@ -66,6 +66,12 @@ function Godmode:LoadPlayers(filename)
 					players[player:GetSteamId().string] = player
 
 					Chat:Send(player, "[Godmode] You were detected - Godmode set to: " ..tostring(playerStates[player:GetSteamId().string]), Color(55, 155, 255))
+
+					if playerStates[player:GetSteamId().string] == true then
+						Network:Send(player, "GodmodeToggle", true)
+					else
+						Network:Send(player, "GodmodeToggle", false)
+					end
 				end
 			end
 		end
@@ -376,6 +382,12 @@ function Godmode:PlayerJoin(args)
 		self.players[args.player:GetSteamId().string] = args.player
 
 		Chat:Send(args.player, "[Godmode] You were detected - Godmode set to: " ..tostring(self.playerStates[args.player:GetSteamId().string]), Color(55, 155, 255))
+
+		if self.playerStates[args.player:GetSteamId().string] == true then
+			Network:Send(args.player, "GodmodeToggle", true)
+		else
+			Network:Send(args.player, "GodmodeToggle", false)
+		end
 	end
 end
 
