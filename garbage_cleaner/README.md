@@ -2,7 +2,7 @@
 JC2-MP Garbage Cleanup plugin 
 ===================
 
-This plugin was created by [Catlinman](https://twitter.com/Catlinman_) for for the [Just Cause 2: Multiplayer mod](http://jc-mp.com).
+This plugin was created by [Catlinman](https://twitter.com/Catlinman_) for the [Just Cause 2: Multiplayer mod](http://jc-mp.com).
 
 The Garbage Cleanup plugin is used to remove all unmanaged and unused vehicles from the server reducing the amount of physics calculations the server has to perform. An example of an unmanaged vehicle would be for instance when a plugin like the metatank plugin spawns in a new vehicle. This vehicle is unmanaged and remains on the server until a player enters it and destroys it. This plugin insures that such vehicles are removed.
 

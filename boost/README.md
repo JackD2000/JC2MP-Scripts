@@ -2,7 +2,7 @@
 JC2-MP Boost plugin 
 ===================
 
-This plugin was created by [Catlinman](https://twitter.com/Catlinman_) for for the [Just Cause 2: Multiplayer mod](http://jc-mp.com).
+This plugin was created by [Catlinman](https://twitter.com/Catlinman_) for the [Just Cause 2: Multiplayer mod](http://jc-mp.com).
 
 On pressing the shift key, the registered players vehicle will start charging into the direction of its last movement. 
 

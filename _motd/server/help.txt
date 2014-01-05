@@ -1,0 +1,2 @@
+Press F5 for a detailed help window and F6 to view all players on the server
+Press 'g' to open the warp menu and teleport yourself to players who allow it

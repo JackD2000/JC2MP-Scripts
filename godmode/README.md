@@ -2,7 +2,7 @@
 JC2-MP Godmode plugin 
 ===================
 
-This plugin was created by [Catlinman](https://twitter.com/Catlinman_) for for the [Just Cause 2: Multiplayer mod](http://jc-mp.com).
+This plugin was created by [Catlinman](https://twitter.com/Catlinman_) for the [Just Cause 2: Multiplayer mod](http://jc-mp.com).
 
 The plugin makes every player who has been registered by an admin invincible.
 

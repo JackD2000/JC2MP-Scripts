@@ -1,0 +1,3 @@
+Welcome to the Hivemind official plugin testing server!
+Admins are: Catlinman and Jokler
+For additional information type '/help' in the chat!
