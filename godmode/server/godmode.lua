@@ -1,4 +1,16 @@
+
 class 'Godmode'
+
+--Quick string to boolean function - There is obviously a better way to do this...
+local function StringToBool(s)
+	if s == "true" then
+		return true
+	elseif s == "false" then
+		return false
+	else
+		return false
+	end
+end
 
 --We use this function to load the admins SteamIds into the admins table
 function Godmode:LoadAdmins(filename)
@@ -25,6 +37,62 @@ function Godmode:LoadAdmins(filename)
 	return admins
 end
 
+--We use this function to load each registered players stored data 
+function Godmode:LoadPlayers(filename)
+	local file = io.open(filename, "r")
+	local i = 0
+	local players = {}
+	local playerStates = {}
+
+	--If there is no user file we can just ignore loading
+	if file == nil then
+		return
+	end
+	
+	for line in file:lines() do
+		i = i + 1
+		
+		--Check if the line was commented out
+		if string.sub(line, 1, 2) ~= "--" then
+			local playerString = line:split(" ")
+
+			--We create a template which will be completed once a player joins
+			players[playerString[1]] = {}
+			playerStates[playerString[1]] = StringToBool(playerString[2])
+
+			--We make sure that if a player from the loaded list is on the server we complete his template
+			for player in Server:GetPlayers() do
+				if player:GetSteamId().string == playerString[1] then
+					players[player:GetSteamId().string] = player
+
+					Chat:Send(player, "[Godmode] You were detected - Godmode set to: " ..tostring(playerStates[player:GetSteamId().string]), Color(55, 155, 255))
+				end
+			end
+		end
+	end
+
+	file:close()
+
+	return players, playerStates
+end
+
+function Godmode:SavePlayers(filename)
+	local file = io.open(filename, "w")
+
+	--If there is no user file we can just ignore loading
+	if file == nil then
+		return
+	end
+	
+	for i, player in pairs(self.players) do
+		file:write(player:GetSteamId().string, " ", tostring(self.playerStates[player:GetSteamId().string]), "\n")
+	end
+
+	file:close()
+
+	return true
+end
+
 function Godmode:__init()
 	--The time between ticks in milliseconds (Default 1000)
 	self.interval = 1000
@@ -34,8 +102,7 @@ function Godmode:__init()
 
 	self.timer = Timer()
 
-	self.players = {}
-	self.playerStates = {}
+	self.players, self.playerStates = self:LoadPlayers("server/players.txt")
 
 	Events:Subscribe("PreTick",			self, self.Tick)
 	Events:Subscribe("PlayerChat", 		self, self.PlayerChat)
@@ -256,7 +323,7 @@ function Godmode:PlayerChat(args)
 					if playerExists == true then
 						for i, player in pairs(self.players) do
 							if IsValid(player) then
-								playerNames = playerNames .." '" .. player:GetName() .. "' (" ..string.upper(tostring(self.playerStates[player:GetSteamId().string])) ..")" --.. player:GetSteamId().string .. ")"
+								playerNames = playerNames .." '" .. player:GetName() .. "' [" ..string.upper(tostring(self.playerStates[player:GetSteamId().string])) .."]"
 							end
 						end
 					else
@@ -286,7 +353,6 @@ function Godmode:PlayerChat(args)
 			else
 				if self.playerStates[id] == true then
 					self:DisablePlayer(args.player)
-
 				else
 					self:EnablePlayer(args.player)
 				end
@@ -308,16 +374,20 @@ end
 function Godmode:PlayerJoin(args)
 	if self.players[args.player:GetSteamId().string] ~= nil then
 		self.players[args.player:GetSteamId().string] = args.player
+
+		Chat:Send(args.player, "[Godmode] You were detected - Godmode set to: " ..tostring(self.playerStates[args.player:GetSteamId().string]), Color(55, 155, 255))
 	end
 end
 
 function Godmode:PlayerQuit(args)
 	if self.players[args.player:GetSteamId().string] then
-		self:DisablePlayer(args.player)
+		Network:Send(args.player, "GodmodeToggle", false)
 	end
 end
 
 function Godmode:ModuleUnload(args)
+	self:SavePlayers("server/players.txt")
+
 	for i, player in pairs(self.players) do
 		if IsValid(player) then
 			if self.playerStates[player:GetSteamId().string] == true then

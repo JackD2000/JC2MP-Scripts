@@ -1,6 +1,17 @@
 
 class 'Boost'
 
+--Quick string to boolean function - There is obviously a better way to do this...
+local function StringToBool(s)
+	if s == "true" then
+		return true
+	elseif s == "false" then
+		return false
+	else
+		return false
+	end
+end
+
 --We use this function to load the admins SteamIds into the admins table
 function Boost:LoadAdmins(filename)
 	local file = io.open(filename, "r")
@@ -26,8 +37,6 @@ function Boost:LoadAdmins(filename)
 	return admins
 end
 
---[[	WIP
-
 --We use this function to load each registered players stored data 
 function Boost:LoadPlayers(filename)
 	local file = io.open(filename, "r")
@@ -41,35 +50,62 @@ function Boost:LoadPlayers(filename)
 	
 	for line in file:lines() do
 		i = i + 1
-		
+
 		--Check if the line was commented out
 		if string.sub(line, 1, 2) ~= "--" then
-			players[i] = line
+			local playerString = line:split(" ")
+
+			--We create a template which will be completed once a player joins
+			players[playerString[1]] = {name = nil, id = playerString[1], localid = nil, enabled = StringToBool(playerString[2]), speed = 1}
+
+			--We make sure that if a player from the loaded list is on the server we complete his template
+			for player in Server:GetPlayers() do
+				if player:GetSteamId().string == playerString[1] then
+					players[player:GetSteamId().string] = {name = player:GetName(), id = player:GetSteamId().string, localid = player:GetId(), enabled = StringToBool(playerString[2]), speed = 1}
+				
+					Chat:Send(player, "[Boost] You were detected - Boost set to: " ..tostring(players[player:GetSteamId().string].enabled), Color(55, 155, 255))
+				end
+			end
 		end
 	end
 
 	file:close()
 
-	return admins
+	return players
 end
 
-]]
+function Boost:SavePlayers(filename)
+	local file = io.open(filename, "w")
+
+	--If there is no user file we can just ignore loading
+	if file == nil then
+		return
+	end
+	
+	for i, player in pairs(self.playerValues) do
+		file:write(player.id, " ", tostring(player.enabled), "\n")
+	end
+
+	file:close()
+
+	return true
+end
 
 function Boost:__init()
 	--Load all the admins!
 	self.admins = self:LoadAdmins("server/admins.txt")
 
 	--Instead of storing full sets of players we only store their associated values
-	self.playerValues = {}
+	self.playerValues = self:LoadPlayers("server/players.txt")
 
 	--The amount of boost added each tick
 	self.boostAmount = 0.001
 
 	Network:Subscribe("BoostAccelerate", self, self.Accelerate)
 
-	Events:Subscribe("PostTick", self, self.Cooldown)
-	Events:Subscribe("PlayerChat", self, self.PlayerChat)
-	Events:Subscribe("PlayerQuit", 	self, self.PlayerQuit)
+	Events:Subscribe("PostTick", 		self, self.Cooldown)
+	Events:Subscribe("PlayerChat", 		self, self.PlayerChat)
+	Events:Subscribe("PlayerJoin",		self, self.PlayerJoin)
 	Events:Subscribe("ModuleUnload", 	self, self.ModuleUnload)
 end
 
@@ -88,7 +124,7 @@ function Boost:isAdmin(player)
 end
 
 function Boost:AddPlayer(player)
-	self.playerValues[player:GetSteamId().string] = {name = player:GetName(), id = player:GetSteamId(), localid = player:GetId(), enabled = true, speed = 1}
+	self.playerValues[player:GetSteamId().string] = {name = player:GetName(), id = player:GetSteamId().string, localid = player:GetId(), enabled = true, speed = 1}
 
 	Chat:Send(player, "[Boost] You have been added to the list of registered players!", Color(0, 255, 0))
 end
@@ -99,7 +135,7 @@ function Boost:RemovePlayer(player)
 			self.playerValues[player:GetSteamId().string] = nil
 		end
 
-		Chat:Send(player, "[Boost] You have been removed from the list of Godmode players - You are now mortal again!", Color(0, 255, 0))
+		Chat:Send(player, "[Boost] You have been removed from the list of registered players!", Color(0, 255, 0))
 	end
 end
 
@@ -239,7 +275,7 @@ function Boost:PlayerChat(args)
 					if playerExists == true then
 						for i, player in pairs(self.playerValues) do
 							if IsValid(Player.GetById(player.localid)) then
-								playerNames = playerNames .." '" .. player.name .. "' (" ..string.upper(tostring(player.enabled)) ..")"
+								playerNames = playerNames .." '" .. player.name .. "' [" ..string.upper(tostring(player.enabled)) .."]"
 							end
 						end
 					else
@@ -319,19 +355,20 @@ function Boost:Accelerate(args, client)
 	end
 end
 
-function Boost:PlayerQuit(args)
-	if self.playerValues[args.player:GetSteamId().string] then
-		self.playerValues[args.player:GetSteamId().string].enabled = false
+function Boost:PlayerJoin(args)
+	if self.playerValues[args.player:GetSteamId().string] ~= nil then
+		self.playerValues[args.player:GetSteamId().string].name = args.player:GetName()
+		self.playerValues[args.player:GetSteamId().string].localid = args.player:GetId()
+
+		Chat:Send(args.player, "[Boost] You were detected - Boost set to: " ..tostring(self.playerValues[args.player:GetSteamId().string].enabled), Color(55, 155, 255))
 	end
 end
 
 function Boost:ModuleUnload(args)
-	for i, player in pairs(self.playerValues) do
-		if player.enabled == true then
-			player.enabled = false
+	self:SavePlayers("server/players.txt")
 
-			Chat:Send(Player.GetById(player.localid), "[Boost] Module unloaded - Your boost has been disabled.", Color(255, 155, 55))
-		end
+	for i, player in pairs(self.playerValues) do
+		Chat:Send(Player.GetById(player.localid), "[Boost] Module unloaded - Your boost has been disabled.", Color(255, 155, 55))
 	end
 end
 
