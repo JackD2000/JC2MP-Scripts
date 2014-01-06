@@ -57,15 +57,6 @@ function Boost:LoadPlayers(filename)
 
 			--We create a template which will be completed once a player joins
 			players[playerString[1]] = {name = nil, id = playerString[1], localid = nil, enabled = StringToBool(playerString[2]), speed = 1}
-
-			--We make sure that if a player from the loaded list is on the server we complete his template
-			for player in Server:GetPlayers() do
-				if player:GetSteamId().string == playerString[1] then
-					players[player:GetSteamId().string] = {name = player:GetName(), id = player:GetSteamId().string, localid = player:GetId(), enabled = StringToBool(playerString[2]), speed = 1}
-				
-					Chat:Send(player, "[Boost] You were detected - Boost set to: " ..tostring(players[player:GetSteamId().string].enabled), Color(55, 155, 255))
-				end
-			end
 		end
 	end
 
@@ -105,7 +96,7 @@ function Boost:__init()
 
 	Events:Subscribe("PostTick", 		self, self.Cooldown)
 	Events:Subscribe("PlayerChat", 		self, self.PlayerChat)
-	Events:Subscribe("PlayerJoin",		self, self.PlayerJoin)
+	Events:Subscribe("ClientModuleLoad",self, self.ClientModuleLoad)
 	Events:Subscribe("ModuleUnload", 	self, self.ModuleUnload)
 end
 
@@ -355,12 +346,16 @@ function Boost:Accelerate(args, client)
 	end
 end
 
-function Boost:PlayerJoin(args)
-	if self.playerValues[args.player:GetSteamId().string] ~= nil then
-		self.playerValues[args.player:GetSteamId().string].name = args.player:GetName()
-		self.playerValues[args.player:GetSteamId().string].localid = args.player:GetId()
+function Boost:ClientModuleLoad(args)
+	if args.player ~= nil then
+		if IsValid(args.player) then
+			if self.playerValues[args.player:GetSteamId().string] ~= nil then
+				self.playerValues[args.player:GetSteamId().string].name = args.player:GetName()
+				self.playerValues[args.player:GetSteamId().string].localid = args.player:GetId()
 
-		Chat:Send(args.player, "[Boost] You were detected - Boost set to: " ..tostring(self.playerValues[args.player:GetSteamId().string].enabled), Color(55, 155, 255))
+				Chat:Send(args.player, "[Boost] You were detected - Boost set to: " ..tostring(self.playerValues[args.player:GetSteamId().string].enabled), Color(55, 155, 255))
+			end
+		end
 	end
 end
 

@@ -59,21 +59,6 @@ function Godmode:LoadPlayers(filename)
 			--We create a template which will be completed once a player joins
 			players[playerString[1]] = {}
 			playerStates[playerString[1]] = StringToBool(playerString[2])
-
-			--We make sure that if a player from the loaded list is on the server we complete his template
-			for player in Server:GetPlayers() do
-				if player:GetSteamId().string == playerString[1] then
-					players[player:GetSteamId().string] = player
-
-					Chat:Send(player, "[Godmode] You were detected - Godmode set to: " ..tostring(playerStates[player:GetSteamId().string]), Color(55, 155, 255))
-
-					if playerStates[player:GetSteamId().string] == true then
-						Network:Send(player, "GodmodeToggle", true)
-					else
-						Network:Send(player, "GodmodeToggle", false)
-					end
-				end
-			end
 		end
 	end
 
@@ -112,8 +97,7 @@ function Godmode:__init()
 
 	Events:Subscribe("PreTick",			self, self.Tick)
 	Events:Subscribe("PlayerChat", 		self, self.PlayerChat)
-	Events:Subscribe("PlayerJoin",		self, self.PlayerJoin)
-	Events:Subscribe("PlayerQuit", 		self, self.PlayerQuit)
+	Events:Subscribe("ClientModuleLoad",self, self.ClientModuleLoad)
 	Events:Subscribe("ModuleUnload", 	self, self.ModuleUnload)
 end
 
@@ -377,23 +361,21 @@ function Godmode:PlayerChat(args)
 	return true
 end
 
-function Godmode:PlayerJoin(args)
-	if self.players[args.player:GetSteamId().string] ~= nil then
-		self.players[args.player:GetSteamId().string] = args.player
+function Godmode:ClientModuleLoad(args)
+	if args.player ~= nil then
+		if IsValid(args.player) then
+			if self.players[args.player:GetSteamId().string] ~= nil then
+				self.players[args.player:GetSteamId().string] = args.player
 
-		Chat:Send(args.player, "[Godmode] You were detected - Godmode set to: " ..tostring(self.playerStates[args.player:GetSteamId().string]), Color(55, 155, 255))
+				Chat:Send(args.player, "[Godmode] You were detected - Godmode set to: " ..tostring(self.playerStates[args.player:GetSteamId().string]), Color(55, 155, 255))
 
-		if self.playerStates[args.player:GetSteamId().string] == true then
-			Network:Send(args.player, "GodmodeToggle", true)
-		else
-			Network:Send(args.player, "GodmodeToggle", false)
+				if self.playerStates[args.player:GetSteamId().string] == true then
+					Network:Send(args.player, "GodmodeToggle", true)
+				else
+					Network:Send(args.player, "GodmodeToggle", false)
+				end
+			end
 		end
-	end
-end
-
-function Godmode:PlayerQuit(args)
-	if self.players[args.player:GetSteamId().string] then
-		Network:Send(args.player, "GodmodeToggle", false)
 	end
 end
 

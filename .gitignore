@@ -213,3 +213,5 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+boost/server/players.txt
+godmode/server/players.txt

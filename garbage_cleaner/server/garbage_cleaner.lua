@@ -1,15 +1,3 @@
---[[	
-	Garbage cleaner - Created by Catlinman (https://twitter.com/Catlinman_)
-
-	This script makes sure that no vehicles spawned through other plugins like the metatank
-	plugin remain for too long cluttering the server. It uses a timer to remove vehicles
-	after a certain interval if they are not being occupied. The default interval is 30 minutes.
-	I have also modified the freeroam plugin to only reload vehicles if the event 'ReloadVehicles'
-	is fired. This way, vehicles are removed and then reloaded in the freeroam plugin after they have
-	been removed here.
-
-	The freeroam plugin has also been modified to use a fixed spawns.txt file location for easier management.
-]]
 
 class 'Garbagecleaner'
 
