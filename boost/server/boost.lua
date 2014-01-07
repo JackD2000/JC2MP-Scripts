@@ -258,15 +258,23 @@ function Boost:PlayerChat(args)
 					local playerExists = false
 
 					for i, p in pairs(self.playerValues) do
-						if IsValid(Player.GetById(p.localid)) then
-							playerExists = true
+						local id = p.localid
+
+						if id ~= nil then
+							if IsValid(Player.GetById(id)) then
+								playerExists = true
+							end
 						end
 					end
 
 					if playerExists == true then
 						for i, player in pairs(self.playerValues) do
-							if IsValid(Player.GetById(player.localid)) then
-								playerNames = playerNames .." '" .. player.name .. "' [" ..string.upper(tostring(player.enabled)) .."]"
+							local id = player.localid
+
+							if id ~= nil
+								if IsValid(Player.GetById(id)) then
+									playerNames = playerNames .." '" .. player.name .. "' [" ..string.upper(tostring(player.enabled)) .."]"
+								end
 							end
 						end
 					else
