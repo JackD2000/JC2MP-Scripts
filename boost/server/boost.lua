@@ -67,11 +67,6 @@ end
 
 function Boost:SavePlayers(filename)
 	local file = io.open(filename, "w")
-
-	--If there is no user file we can just ignore loading
-	if file == nil then
-		return
-	end
 	
 	for i, player in pairs(self.playerValues) do
 		file:write(player.id, " ", tostring(player.enabled), "\n")

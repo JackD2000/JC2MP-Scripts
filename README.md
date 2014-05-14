@@ -9,12 +9,11 @@ It should be noted that the community plugins that we have incorperated into our
 
 Collaborators
 --------------
-**Catlinman** <br/>
-- [Twitter](https://twitter.com/Catlinman_)<br/>
-- [Tumblr Blog](http://xcatlinman.tumblr.com/)<br/>
 
-**Jokler**<br/>
-- [Twitter](https://twitter.com/Jokler13)<br/>
+**[Catlinman](http://catlinman.com/)** <br/>
+
+**[Jokler](https://twitter.com/Jokler13)**<br/>
+
 
 Plugins
 --------------
